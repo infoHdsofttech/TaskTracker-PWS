@@ -1,0 +1,49 @@
+import express, { Request, response, Response } from 'express';
+import bcrypt from 'bcryptjs';  // Hashing passwords
+import jwt from 'jsonwebtoken'; // Generating JWT token
+import prisma from '../../lib/prisma';
+
+const authRouter = express.Router();
+const SECRET_KEY = "supersecretkey"; // Replace with env variable
+
+
+authRouter.post('/signup', async (req: Request, res: Response): Promise<any>=> {
+    const { email, password } = req.body;
+
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) return res.status(400).json({ message: "User already exists" });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await prisma.user.create({
+            data: {
+                email,
+                password: hashedPassword,
+            }
+        });
+
+        res.status(201).json({ message: "User created successfully", user: newUser });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating user", error });
+    }
+});
+
+authRouter.post('/login', async (req: Request, res: Response):Promise <any> => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) return res.status(401).json({ message: "Invalid email or password" });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
+
+        const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
+
+        res.json({ message: "Login successful", token,status: 200 });
+    } catch (error) {
+        res.status(500).json({ message: "Error logging in", error });
+    }
+});
+
+export default authRouter;

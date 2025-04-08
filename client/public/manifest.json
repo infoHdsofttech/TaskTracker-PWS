@@ -1,0 +1,23 @@
+{
+    "name": "Task Tracker PWA",
+    "short_name": "TaskPWA",
+    "icons": [
+      {
+        "src": "./vercel.svg",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "./vercel.svg",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": "/",
+    "scope": "/",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#1976d2"
+  }
+  

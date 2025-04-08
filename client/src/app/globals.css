@@ -1,0 +1,17 @@
+/* app/globals.css */
+
+/* Import Manrope from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+
+/* Minimal CSS reset */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  max-width: 100vw;
+  overflow-x: hidden;
+  /* This ensures the browser uses Manrope if nothing else overrides it */
+  font-family: '"Manrope", sans-serif',
+}

@@ -1,0 +1,28 @@
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DEFERRED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+model Task {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  group        String?      // Optional grouping field (e.g., "Work", "Personal")
+  startDate    DateTime     // Scheduled start date of the task
+  endDate      DateTime?    // Optional end date or deadline for the task
+  status       TaskStatus   @default(PENDING)  // For dashboard: pending, in-progress, completed, deferred
+  priority     TaskPriority @default(MEDIUM)   // Task priority: low, medium, high
+  timerStarted DateTime?    // When the task timer was started
+  timerEnded   DateTime?    // When the task timer was stopped
+  user         User         @relation(fields: [userId], references: [id])
+  userId       String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
