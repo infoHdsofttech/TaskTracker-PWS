@@ -47,6 +47,7 @@ const InputField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   };
 
   return (
+    <>
     <Box
       sx={{
         // White rounded container
@@ -116,14 +117,18 @@ const InputField = forwardRef<HTMLInputElement, Props>((props, ref) => {
         {...inputProps}
       />
 
-      {/* Error message (if any) */}
-      {errorMessage && (
+   {/* Error message (if any) */}
+   {errorMessage && (
         <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>
           {errorMessage}
         </Typography>
-      )}
+      )} 
     </Box>
+
+       
+      </>
   );
+  
 });
 
 InputField.displayName = "InputField";

@@ -174,4 +174,35 @@ taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: 
     }
   });
   
+  taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): Promise<void> => {
+    const { status } = req.query; // expected values: "TODO", "IN_PROGRESS", "DONE", or "ALL"
+    const userId = (req as any).userId; // provided by verifyToken middleware
+  
+    // Validate that status is provided as a string
+    if (typeof status !== 'string') {
+      res.status(400).json({ message: "Status parameter is required" });
+      return;
+    }
+  
+    try {
+      // If status is "ALL", don't include it in the filter.
+      const filter: any = { userId };
+  
+      if (status.toUpperCase() !== "ALL") {
+        filter.status = status;
+      }
+  
+      const tasks = await prisma.task.findMany({
+        where: filter,
+        orderBy: { createdAt: 'desc' },
+      });
+  
+      res.status(200).json({ message: "Tasks fetched successfully", tasks });
+      return;
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching tasks", error });
+      return;
+    }
+  });
+  
   export default taskRouter;

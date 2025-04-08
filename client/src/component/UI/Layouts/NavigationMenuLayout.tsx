@@ -15,6 +15,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import HomeIcon from "@mui/icons-material/Home";
 import EventIcon from "@mui/icons-material/Event";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -28,6 +29,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
   // Use MUI's breakpoint system to detect desktop vs. mobile
   const isDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const theme = useTheme();
+  const router = useRouter();
 
   if (isDesktop) {
     // Desktop Layout: Permanent Drawer on the left
@@ -53,7 +55,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
           <Box sx={{ p: 2  }}>
             <h3>Task Tracker</h3>
             <List>
-              <ListItem button>
+            <ListItem button onClick={() => router.push("/home")}>
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
@@ -65,7 +67,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
                 </ListItemIcon>
                 <ListItemText primary="Calendar" />
               </ListItem>
-              <ListItem button>
+              <ListItem button onClick={() => router.push("/create-task")}>
                 <ListItemIcon>
                   <DescriptionIcon />
                 </ListItemIcon>
@@ -108,9 +110,9 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
           <BottomNavigation showLabels sx={{       backgroundColor: "#eef2fc",
       backgroundImage: "linear-gradient(61deg, #eef2fc 0%, #d3bcea 100%)",
              }}>
-            <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-            <BottomNavigationAction label="Calendar" icon={<EventIcon />} />
-            <BottomNavigationAction label="Docs" icon={<DescriptionIcon />} />
+            <BottomNavigationAction label="Home" icon={<HomeIcon />} onClick={() => router.push("/home")}/>
+            <BottomNavigationAction label="Calendar" icon={<EventIcon />} onClick={() => router.push("/create-task")} />
+            <BottomNavigationAction label="Docs" icon={<DescriptionIcon />}    />
             <BottomNavigationAction label="Team" icon={<GroupIcon />} />
           </BottomNavigation>
         </Paper>

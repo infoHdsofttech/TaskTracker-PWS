@@ -23,3 +23,15 @@ export const createTaskAction = async (data: CreateTaskData) => {
     throw error;
   }
 };
+
+
+export const fetchTasksByStatus = async (status: string) => {
+  try {
+    // Adjust the API route if needed (e.g. "/task/get-tasks")
+    const response = await api.get(`/task/get-tasks?status=${status}`);
+    return response.data;
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || "Error fetching tasks");
+    throw error;
+  }
+};

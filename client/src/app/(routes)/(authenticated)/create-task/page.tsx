@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import {
   Box,
@@ -18,8 +18,8 @@ import {
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { createTaskAction, CreateTaskData } from "@/actions/task";
 
-// ❗ Import your custom InputField component here:
 import InputField from "@/component/UI/InputField/InputField";
+import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
 
 export default function CreateTaskPage() {
   const {
@@ -33,6 +33,12 @@ export default function CreateTaskPage() {
     },
   });
 
+  const options = [
+    { value: "LOW", label: "Low" },
+    { value: "MEDIUM", label: "Medium" },
+    { value: "HIGH", label: "High" },
+  ];
+
   const theme = useTheme();
   const onSubmit: SubmitHandler<CreateTaskData> = async (data) => {
     try {
@@ -43,6 +49,8 @@ export default function CreateTaskPage() {
       console.error("Error creating task:", error);
     }
   };
+
+  const [priority, setPriority] = useState("MEDIUM");
 
   return (
     <Box
@@ -104,22 +112,14 @@ export default function CreateTaskPage() {
             />
 
     {/* Priority */}
-    <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="priority-label">Priority</InputLabel>
-              <Select
-                labelId="priority-label"
-                label="Priority"
-                defaultValue="MEDIUM"
-                {...register("priority")}
-              >
-                <MenuItem value="LOW">Low</MenuItem>
-                <MenuItem value="MEDIUM">Medium</MenuItem>
-                <MenuItem value="HIGH">High</MenuItem>
-              </Select>
-              {errors.priority && (
-                <FormHelperText error>{errors.priority.message}</FormHelperText>
-              )}
-            </FormControl>
+    <DropDownSelectField
+      label="Priority"
+      required
+      value={priority}
+      onChange={(e) => setPriority(e.target.value)}
+      options={options}
+      // infoText="Select the task priority"
+    />
 </Box>
 
 
