@@ -17,7 +17,7 @@ export default function Home() {
     sx={{
       p: 2,
     // Ensures the background covers the full viewport height
-    backgroundImage: "url('/images/bg.jpg')", // Image from public folder
+    backgroundImage: theme.colors.backgroundGradientYellow, // Image from public folder
       backgroundSize: "cover",
       backgroundPosition: "center",
       height: "100vh",

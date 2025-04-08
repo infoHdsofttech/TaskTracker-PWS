@@ -10,6 +10,7 @@ import {
   BottomNavigationAction,
   Paper,
   List,
+  useTheme,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -26,6 +27,7 @@ interface LayoutProps {
 export default function NavigationMenuLayout({ children }: LayoutProps) {
   // Use MUI's breakpoint system to detect desktop vs. mobile
   const isDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
+  const theme = useTheme();
 
   if (isDesktop) {
     // Desktop Layout: Permanent Drawer on the left
@@ -40,7 +42,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
       width: 240,
       boxSizing: "border-box",
       backgroundColor: "#eef2fc",
-      backgroundImage: "linear-gradient(61deg, #eef2fc 0%, #d3bcea 100%)",
+      backgroundImage: theme.colors.backgroundGradientPurple,
 
 
 
