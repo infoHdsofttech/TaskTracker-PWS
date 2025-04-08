@@ -1,4 +1,4 @@
-import { Info } from '@mui/icons-material';
+import { Info } from "@mui/icons-material";
 import {
   Box,
   Input,
@@ -6,31 +6,32 @@ import {
   Tooltip,
   InputProps as MUIInputProps,
   InputAdornment,
-} from '@mui/material';
-import React, { forwardRef } from 'react';
+} from "@mui/material";
+import React, { forwardRef } from "react";
 
 type Props = {
   label: string;
   type?: string;
   required?: boolean;
   errorMessage?: string;
-  classes?: string;
   infoText?: string | string[];
   disabled?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   icon?: React.ReactNode;
+  value?: string; // so we can show the typed text
 } & MUIInputProps;
 
 const InputField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const {
     label,
-    type = 'text',
+    type = "text",
     required,
-    classes,
     errorMessage,
     disabled,
     infoText,
     icon,
+    value,
+    onChange,
     ...inputProps
   } = props;
 
@@ -47,83 +48,77 @@ const InputField = forwardRef<HTMLInputElement, Props>((props, ref) => {
 
   return (
     <Box
-      className={`flex flex-col ${classes}`}
       sx={{
-        marginBottom: '27px',
-        width: '100%',
-        '@media (max-width: 640px)': {
-          marginBottom: '10px',
-        },
-
+        // White rounded container
+        backgroundColor: "#fff",
+        boxShadow: "0px 4px 8px rgba(70, 95, 241, 0.10)",
+        borderRadius: 2,
+        padding: 2,
+        marginBottom: 3,
+        width: "100%",
       }}
     >
-      {/* LABEL SECTION */}
-      <label>
-        <Typography
-          variant="subtitle2"
-          fontWeight={600}
-          sx={{ color: '#222' }} // or #555, depending on your preference
-        >
+      {/* Small, subtle label text at the top */}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+        <Typography variant="body2" sx={{ color: "#666", fontWeight: 500 }}>
           {label}
-          {required && <span style={{ color: 'red' }}> *</span>}
-          {infoText && (
-            <Tooltip title={renderInfoText()} arrow placement="top">
-              <Info
-                sx={{
-                  cursor: 'pointer',
-                  marginLeft: '8px',
-                  verticalAlign: 'middle',
-                //   color: lightColors.main,
-                }}
-              />
-            </Tooltip>
-          )}
+          {required && <span style={{ color: "red" }}> *</span>}
         </Typography>
-      </label>
 
-      {/* TEXT INPUT FIELD */}
+        {/* Optional info icon tooltip */}
+        {infoText && (
+          <Tooltip title={renderInfoText()} arrow placement="top">
+            <Info
+              sx={{
+                cursor: "pointer",
+                ml: 1,
+                fontSize: 18,
+                color: "#666",
+                verticalAlign: "middle",
+              }}
+            />
+          </Tooltip>
+        )}
+      </Box>
+
+      {/* Larger text for the user input */}
       <Input
+        ref={ref}
         type={type}
+        value={value}
+        onChange={onChange}
         placeholder={`Enter ${label}`}
-        inputRef={ref}
-        error={Boolean(errorMessage)}
+        disableUnderline
         disabled={disabled}
         endAdornment={
           icon && <InputAdornment position="end">{icon}</InputAdornment>
         }
+        error={Boolean(errorMessage)}
         sx={{
-          marginTop: '8px',
-          padding: '10px',
-          borderRadius: '8px',
-        //   border: '1px solid rgba(70,95,241,0.40)',
-          bgcolor: 'white',
-          boxShadow: '0px 4px 8px 0px rgba(70, 95, 241, 0.10)',
-          fontSize: '1.125rem', // Larger text size
-          '::before, ::after': {
-            borderBottom: 'none !important', // remove default MUI underline
-          },
-          ':hover:not(.Mui-disabled):not(.Mui-error)::before': {
-            borderBottom: 'none !important',
+          width: "100%",
+          fontSize: "1rem", // Bigger text
+          fontWeight: 500,
+          color: "#222",
+          // Remove MUI’s default underline
+          "::before, ::after": { borderBottom: "none !important" },
+          ":hover:not(.Mui-disabled):not(.Mui-error)::before": {
+            borderBottom: "none !important",
           },
           // Remove spin buttons if type="number"
-          '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button':
+          "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
             {
-              display: 'none',
+              display: "none",
             },
-          '& input[type=number]': {
-            MozAppearance: 'textfield',
+          "& input[type=number]": {
+            MozAppearance: "textfield",
           },
-        //   '@media (max-width: 414px)': {
-        //     width: '100%',
-        //   },
-        width: '100%',
         }}
         {...inputProps}
       />
 
-      {/* ERROR MESSAGE */}
+      {/* Error message (if any) */}
       {errorMessage && (
-        <Typography color="error" variant="body2" sx={{ marginTop: '8px' }}>
+        <Typography color="error" variant="caption" sx={{ mt: 1, display: "block" }}>
           {errorMessage}
         </Typography>
       )}
@@ -131,6 +126,5 @@ const InputField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   );
 });
 
-InputField.displayName = 'InputField';
-
+InputField.displayName = "InputField";
 export default InputField;
