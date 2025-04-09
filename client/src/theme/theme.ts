@@ -13,12 +13,15 @@ declare module '@mui/material/styles' {
     };
   }
   // Allow configuration using `createTheme`
+
+
+
   interface ThemeOptions {
     colors?: {
       mainText?: string;
       background?: string;
-      backgroundGradientYellow?: string;
       backgroundGradientPurple?: string;
+      backgroundGradientYellow?: string;
       // ... add additional custom color properties here
     };
   }

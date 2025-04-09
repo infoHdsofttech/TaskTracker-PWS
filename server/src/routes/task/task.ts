@@ -77,12 +77,12 @@ taskRouter.put('/update-task/:id', verifyToken, async (req: Request, res: Respon
         timerEnded: timerEnded ? new Date(timerEnded) : undefined,
         estimatedTime: estimatedTime !== undefined ? parseInt(estimatedTime, 10) : undefined,
         // New actual start and end fields
-        actualStart: actualStart ? new Date(actualStart) : undefined,
+        // actualStart: actualStart ? new Date(actualStart) : undefined,
         actualEnd: actualEnd ? new Date(actualEnd) : undefined,
         // Update pause flag if provided and valid boolean
         isPaused: typeof isPaused === 'boolean' ? isPaused : undefined,
         // Update completedHours as integer if provided
-        completedHours: completedHours !== undefined ? parseInt(completedHours, 10) : undefined,
+        // completedHours: completedHours !== undefined ? parseInt(completedHours, 10) : undefined,
       },
     });
     res.status(200).json({ message: "Task updated", task: updatedTask });
@@ -114,6 +114,7 @@ taskRouter.delete('/delete-task/:id', verifyToken, async (req: Request, res: Res
 });
 
 // Start Task Timer Endpoint: Sets timerStarted to current time and updates status to IN_PROGRESS.
+// Start Task Timer Endpoint
 taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const userId = (req as any).userId;
@@ -125,18 +126,24 @@ taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: 
       return;
     }
 
+    // Only set actualStart if it has not been set before.
+    const dataToUpdate = {
+      timerStarted: new Date(),
+      isPaused: false,
+      status: 'IN_PROGRESS' as any,
+      ...( !task.actualStart ? { actualStart: new Date() } : {} )
+    };
+
     const updatedTask = await prisma.task.update({
       where: { id },
-      data: {
-        timerStarted: new Date(),
-        status: 'IN_PROGRESS',
-      },
+      data: dataToUpdate,
     });
     res.status(200).json({ message: "Task timer started", task: updatedTask });
   } catch (error) {
     res.status(500).json({ message: "Error starting task timer", error });
   }
 });
+
 
 // Stop Task Timer Endpoint: Sets timerEnded to current time.
 taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
@@ -154,6 +161,7 @@ taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: R
       where: { id },
       data: {
         timerEnded: new Date(),
+        isPaused: true, // Toggle pause state
       },
     });
     res.status(200).json({ message: "Task timer stopped", task: updatedTask });

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ThemeRegistry from "./theme-provider";
 import { Manrope } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
 
 
 const manrope = Manrope({
@@ -25,7 +26,10 @@ export default function RootLayout({
     <html lang="en" className={manrope.className}>
       <body>
         
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+        <Toaster position="top-center" reverseOrder={false} />
+          {children}
+          </ThemeRegistry>
       </body>
     </html>
   );

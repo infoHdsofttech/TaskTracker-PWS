@@ -19,6 +19,22 @@ export interface CreateTaskData {
   completedHours?: string;
 }
 
+export interface UpdateTaskData {
+  group?: string;
+  title?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  priority?: string;
+
+  estimatedTime?: string; // as hours (string so we can convert later)
+  status?: string;
+  actualStart?: string;
+  actualEnd?: string;
+  isPaused?: boolean;
+  completedHours?: string;
+}
+
 // Create a new task
 export const createTaskAction = async (data: CreateTaskData) => {
   try {
@@ -32,7 +48,7 @@ export const createTaskAction = async (data: CreateTaskData) => {
 };
 
 // Update an existing task by ID
-export const updateTaskAction = async (id: string, data: CreateTaskData) => {
+export const updateTaskAction = async (id: string, data: UpdateTaskData) => {
   try {
     const response = await api.put(`/task/update-task/${id}`, data);
     toast.success("Task updated!");

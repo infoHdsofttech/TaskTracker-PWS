@@ -27,7 +27,7 @@ import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSele
 // Constant to simulate page mode. Set to true for update mode.
 const isUpdate = true;
 // For update mode, a hardcoded task ID is used (to be replaced later via context).
-const taskId = "7c96ed4c-ec02-49a9-aad4-8a80a69c5f2e";
+const taskId = "0b347b40-0cd9-4df0-b0e9-458106fb22d9";
 
 export default function CreateTaskPage() {
   const {
@@ -306,27 +306,7 @@ export default function CreateTaskPage() {
                 </>
               )}
 
-              {/* Logo Upload Row */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mt: 2,
-                  mb: 2,
-                }}
-              >
-                <Typography variant="body1" sx={{ mr: 2 }}>
-                  Change Logo
-                </Typography>
-                <IconButton
-                  color="primary"
-                  aria-label="upload logo"
-                  component="label"
-                >
-                  <input hidden accept="image/*" type="file" />
-                  <PhotoCamera />
-                </IconButton>
-              </Box>
+  
 
               {/* Submit Button */}
               <Button
