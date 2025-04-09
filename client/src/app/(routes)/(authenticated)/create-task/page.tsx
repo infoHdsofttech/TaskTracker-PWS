@@ -25,9 +25,9 @@ import InputField from "@/component/UI/InputField/InputField";
 import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
 
 // Constant to simulate page mode. Set to true for update mode.
-const isUpdate = true;
+const isUpdate = false;
 // For update mode, a hardcoded task ID is used (to be replaced later via context).
-const taskId = "0b347b40-0cd9-4df0-b0e9-458106fb22d9";
+// const taskId = "0b347b40-0cd9-4df0-b0e9-458106fb22d9";
 
 export default function CreateTaskPage() {
   const {

@@ -3,6 +3,7 @@ import prisma from '../../lib/prisma';
 import verifyToken from '../../middlewares/Authenticate';
 
 const taskRouter = Router();
+const TestTime = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours ago
 
 // Create Task Endpoint: Now includes estimatedTime and uses plannedStart/End.
 taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response) => {
@@ -146,29 +147,50 @@ taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: 
 
 
 // Stop Task Timer Endpoint: Sets timerEnded to current time.
+// Stop Task Timer Endpoint: Sets timerEnded, marks as paused, and calculates completedHours.
 taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const userId = (req as any).userId;
-
+  
   try {
     const task = await prisma.task.findUnique({ where: { id } });
     if (!task || task.userId !== userId) {
       res.status(404).json({ message: 'Task not found or unauthorized' });
       return;
     }
-
+    
+    const now = new Date();
+    let intervalHours = 0;
+    
+    // Compute the elapsed time since the timer was last started.
+    if (task.timerStarted) {
+      intervalHours = (now.getTime() - new Date(task.timerStarted).getTime()) / (1000 * 60 * 60);
+      // intervalHours = (TestTime.getTime() - new Date(task.timerStarted).getTime()) / (1000 * 60 * 60);
+    }
+    
+    console.log("intervalHours:", intervalHours);
+    // Get previously completed hours; if not set, assume 0.
+    const previousCompleted = task.completedHours ? Number(task.completedHours) : 0;
+    // Add the current interval to get the new total.
+    // If you're using integer hours, you might round or floor the value.
+    const newCompletedHours = previousCompleted + intervalHours;
+    
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
-        timerEnded: new Date(),
-        isPaused: true, // Toggle pause state
+      timerEnded: now,
+      isPaused: true, // Task is paused after stopping the timer.
+      // Update completedHours, rounding down to nearest integer
+      completedHours: Math.round(newCompletedHours),
       },
     });
+    
     res.status(200).json({ message: "Task timer stopped", task: updatedTask });
   } catch (error) {
     res.status(500).json({ message: "Error stopping task timer", error });
   }
 });
+
 
 // Defer Task Endpoint: Marks the task as DEFERRED and optionally updates the planned start date.
 taskRouter.post('/defer-task/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
