@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import React from "react";
+import React,{useEffect} from "react";
 import {
   useMediaQuery,
   Theme,
@@ -14,6 +14,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import HomeIcon from "@mui/icons-material/Home";
@@ -31,6 +32,31 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
   const isDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up("md"));
   const theme = useTheme();
   const router = useRouter();
+
+  // useEffect(() => {
+  //   // Log location when the layout is mounted
+  //   if ("geolocation" in navigator) {
+  //     const watchId = navigator.geolocation.watchPosition(
+  //       (position) => {
+  //         console.log("Current Location:");
+  //         console.log("Latitude:", position.coords.latitude);
+  //         console.log("Longitude:", position.coords.longitude);
+  //       },
+  //       (error) => {
+  //         console.error("Error getting location:", error.message);
+  //       },
+  //       {
+  //         enableHighAccuracy: true,
+  //         timeout: 10000,
+  //         maximumAge: 0,
+  //       }
+  //     );
+  
+  //     return () => navigator.geolocation.clearWatch(watchId);
+  //   } else {
+  //     console.warn("Geolocation is not supported by this browser.");
+  //   }
+  // }, []);
 
   if (isDesktop) {
     // Desktop Layout: Permanent Drawer on the left
@@ -54,8 +80,8 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
 >
           {/* Drawer content here */}
           <Box sx={{ p: 2  }}>
-            <h3>Task Tracker</h3>
-            <List>
+            <Typography variant="h6" color={theme.colors.Indigo}>Task Tracker</Typography>
+            <List  sx={{color:theme.colors.Indigo}}>
             <ListItem button onClick={() => router.push("/home")}>
                 <ListItemIcon>
                   <HomeIcon />

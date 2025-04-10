@@ -11,17 +11,18 @@ import {
   deleteTaskAction,
   deferTaskAction,
 } from "@/actions/task";
+import ButtonInput from "@/component/UI/ButtonInput/ButtonInput";
 
 export default function Home() {
   const theme = useTheme();
   
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [activeFilter, setActiveFilter] = useState<"ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED">("ALL");
+  const [activeFilter, setActiveFilter] = useState<"ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED">("IN_PROGRESS");
 
-  const filters = [
+  const filters: { label: string; value: "ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED" }[] = [
     { label: "All", value: "ALL" },
-    { label: "Pending", value: "PENDING" },
     { label: "In Progress", value: "IN_PROGRESS" },
+    { label: "Pending", value: "PENDING" },
     { label: "Completed", value: "COMPLETED" },
     { label: "Deferred", value: "DEFERRED" },
   ];
@@ -140,20 +141,20 @@ export default function Home() {
         {/* Status Filters */}
         <Box sx={{ display: "flex", gap: 2, mb: 2, flexWrap: "wrap" }}>
           {filters.map((f) => (
-            <Button
+            <ButtonInput
               key={f.value}
-              variant={activeFilter === f.value ? "contained" : "outlined"}
+              text={f.label}
+              type="button"
               onClick={() => setActiveFilter(f.value)}
-              sx={{
-                textTransform: "none",
-                ...(activeFilter === f.value && {
-                  backgroundColor: theme.palette.primary.main,
-                  color: "#fff",
-                }),
-              }}
-            >
-              {f.label}
-            </Button>
+              active={activeFilter === f.value}
+              buttonActiveBackgroundColor={theme.colors.darkPurple}
+              buttonActiveFontColor="#fff"
+              buttonInactiveBackgroundColor={theme.colors.lightPurple}
+              buttonInactiveFontColor="#7752e6"
+              fontSize={14}
+              fontWeight={600}
+              styles={{ width: "auto", minWidth: "100px" }}
+            />
           ))}
         </Box>
         {/* Task Cards */}

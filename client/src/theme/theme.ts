@@ -9,6 +9,11 @@ declare module '@mui/material/styles' {
     colors: {
       mainText: string;
       background: string;
+      backgroundGradientPurple?: string;
+      backgroundGradientYellow?: string;
+      darkPurple?:string,
+      lightPurple?:string,
+      Indigo?:string,
       // Add any additional custom color properties here
     };
   }
@@ -22,6 +27,9 @@ declare module '@mui/material/styles' {
       background?: string;
       backgroundGradientPurple?: string;
       backgroundGradientYellow?: string;
+      darkPurple?:string,
+      lightPurple?:string,
+      Indigo?:string,
       // ... add additional custom color properties here
     };
   }
@@ -40,6 +48,9 @@ export const lightTheme = createTheme({
     background: '#ffffff',
     backgroundGradientYellow: 'linear-gradient(135deg, #fff5e1, #f6f9ff, #fef6f6, #f0f9ff)',
     backgroundGradientPurple: 'radial-gradient(circle, rgba(244,239,255,1) 0%, rgba(246,242,255,1) 18%, rgba(220,208,244,1) 58%)',
+    darkPurple:'#5f33e1',
+    lightPurple:'#ede8ff',
+    Indigo:'#4B3B78'
     // backgroundGradientPurple: 'linear-gradient(180deg, rgba(244,239,255,1) 0%, rgba(246,242,255,1) 13%, rgba(176,152,219,1) 87%)'
   },
   typography: {
@@ -70,6 +81,9 @@ export const darkTheme = createTheme({
     background: '#000000',
     backgroundGradientYellow: 'linear-gradient(135deg, #fff5e1, #f6f9ff, #fef6f6, #f0f9ff)',
     backgroundGradientPurple: 'linear-gradient(180deg, #f4efff 0%, #f6f2ff 50%, #f9f7ff 100%)',
+    darkPurple:'#5f33e1',
+    lightPurple:'#ede8ff',
+     Indigo:'#4B3B78'
   },
   typography: {
     fontFamily: '"Manrope", sans-serif',
