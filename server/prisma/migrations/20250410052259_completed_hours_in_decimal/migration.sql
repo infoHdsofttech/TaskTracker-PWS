@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "completedHours" SET DEFAULT 0.0,
+ALTER COLUMN "completedHours" SET DATA TYPE DOUBLE PRECISION;

@@ -20,8 +20,8 @@ export type Task = {
   title: string;
   description?: string;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED";
-  startDate?: string;
-  endDate?: string;
+  startDate?: string;    // Typically plannedStart is used for initial timer start
+  endDate?: string;      // plannedEnd
   estimatedTime?: string;
   priority?: string;
   actualStart?: string;
@@ -54,14 +54,20 @@ export default function TaskCard({
   onResume,
   onView,
 }: TaskCardProps) {
-  // Function to format time strings.
+  // Helper function to format time strings into a concise format.
   const formatTime = (dateStr?: string) => {
     if (!dateStr) return "No time";
     const date = new Date(dateStr);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Render action buttons based on task status and pause flag.
+  // Helper to format full date and time (for actualStart/actualEnd)
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleString();
+  };
+
+  // Render action buttons based on the task's current status and pause flag.
   const renderTaskActions = () => {
     switch (task.status) {
       case "PENDING":
@@ -103,7 +109,7 @@ export default function TaskCard({
 
       case "IN_PROGRESS":
         if (task.isPaused) {
-          // When paused, show Resume and Edit, Delete options.
+          // If paused, show Resume, Edit, and Delete options.
           return (
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               {onResume && (
@@ -140,7 +146,7 @@ export default function TaskCard({
             </Box>
           );
         } else {
-          // When not paused, show Pause, Complete, Edit and Delete.
+          // If running, show Pause, Complete, Edit, and Delete options.
           return (
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               {onPause && (
@@ -238,6 +244,7 @@ export default function TaskCard({
               </Button>
             )}
           </Box>
+          
         );
 
       default:
@@ -256,7 +263,7 @@ export default function TaskCard({
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
       }}
     >
-      {/* Task Group (small text) */}
+      {/* Task Group */}
       <Typography variant="body2" sx={{ color: "text.secondary" }}>
         {task.group || "No Group"}
       </Typography>
@@ -306,6 +313,22 @@ export default function TaskCard({
 
       {/* Action Buttons */}
       <Box sx={{ mt: 2 }}>{renderTaskActions()}</Box>
+
+      {/* Task Summary Details */}
+      <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 2 }}>
+        <Typography variant="caption" color="text.secondary">
+          ⏱ Estimated: {task.estimatedTime ? `${task.estimatedTime} hrs` : "N/A"}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          ✅ Completed: {task.completedHours ? `${task.completedHours} hrs` : "N/A"}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          ▶ Started: {task.actualStart ? formatTime(task.actualStart) : "N/A"}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          ⏹ Ended: {task.actualEnd ? formatTime(task.actualEnd) : "N/A"}
+        </Typography>
+      </Box>
     </Paper>
   );
 }

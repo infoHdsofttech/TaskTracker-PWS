@@ -180,8 +180,7 @@ taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: R
       data: {
       timerEnded: now,
       isPaused: true, // Task is paused after stopping the timer.
-      // Update completedHours, rounding down to nearest integer
-      completedHours: Math.round(newCompletedHours),
+      completedHours: parseFloat(newCompletedHours.toFixed(2)),
       },
     });
     

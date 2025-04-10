@@ -32,7 +32,8 @@ model Task {
   timerStarted   DateTime?    // When the task timer was started
   timerEnded     DateTime?    // When the task timer was stopped
   isPaused       Boolean      @default(false)    // Flag to pause the timer
-  completedHours Int          @default(0)        // Stores the number of hours completed (as an integer)
+
+  completedHours Float        @default(0.0)
   
   user           User         @relation(fields: [userId], references: [id])
   userId         String
