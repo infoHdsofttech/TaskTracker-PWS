@@ -20,7 +20,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import EventIcon from "@mui/icons-material/Event";
 import DescriptionIcon from "@mui/icons-material/Description";
 import GroupIcon from "@mui/icons-material/Group";
-
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import { CalendarViewDay } from "@mui/icons-material";
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -61,17 +62,19 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
                 </ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItem>
+            
+              <ListItem button onClick={() => router.push("/create-task")}>
+                <ListItemIcon>
+                 <AddTaskIcon /> 
+                </ListItemIcon>
+
+                <ListItemText primary="Add Task" />
+              </ListItem>
               <ListItem button>
                 <ListItemIcon>
                   <EventIcon />
                 </ListItemIcon>
                 <ListItemText primary="Calendar" />
-              </ListItem>
-              <ListItem button onClick={() => router.push("/create-task")}>
-                <ListItemIcon>
-                  <DescriptionIcon />
-                </ListItemIcon>
-                <ListItemText primary="Docs" />
               </ListItem>
               <ListItem button>
                 <ListItemIcon>
@@ -112,7 +115,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
              }}>
             <BottomNavigationAction label="Home" icon={<HomeIcon />} onClick={() => router.push("/home")}/>
             <BottomNavigationAction label="Calendar" icon={<EventIcon />} onClick={() => router.push("/create-task")} />
-            <BottomNavigationAction label="Docs" icon={<DescriptionIcon />}    />
+            <BottomNavigationAction label="AddTask" icon={        <AddTaskIcon />}   onClick={() => router.push("/create-task")} />
             <BottomNavigationAction label="Team" icon={<GroupIcon />} />
           </BottomNavigation>
         </Paper>

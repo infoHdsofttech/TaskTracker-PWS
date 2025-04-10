@@ -56,6 +56,7 @@ export default function TaskCard({
 }: TaskCardProps) {
   // Helper function to format time strings into a concise format.
   const formatTime = (dateStr?: string) => {
+
     if (!dateStr) return "No time";
     const date = new Date(dateStr);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -77,7 +78,8 @@ export default function TaskCard({
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<PlayArrowIcon />}
+                sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                startIcon={<PlayArrowIcon sx={{color:"#5f33e1"}}/>}
                 onClick={() => onStart(task.id)}
               >
                 Start/Resume
@@ -87,7 +89,8 @@ export default function TaskCard({
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<EditIcon />}
+                sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                startIcon={<EditIcon sx={{color:"#5f33e1"}} />}
                 onClick={() => onEdit(task.id)}
               >
                 Edit
@@ -116,7 +119,8 @@ export default function TaskCard({
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<PlayArrowIcon />}
+                  sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                  startIcon={<PlayArrowIcon sx={{color:"#5f33e1"}} />}
                   onClick={() => onResume(task.id)}
                 >
                   Resume
@@ -126,7 +130,8 @@ export default function TaskCard({
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<EditIcon />}
+                  sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                  startIcon={<EditIcon sx={{color:"#5f33e1"}} />}
                   onClick={() => onEdit(task.id)}
                 >
                   Edit
@@ -153,7 +158,8 @@ export default function TaskCard({
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<PauseIcon />}
+                  sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                  startIcon={<PauseIcon sx={{color:"#5f33e1"}}/>}
                   onClick={() => onPause(task.id)}
                 >
                   Pause
@@ -163,7 +169,8 @@ export default function TaskCard({
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<CheckIcon />}
+                  sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                  startIcon={<CheckIcon sx={{color:"#5f33e1"}} />}
                   onClick={() => onComplete(task.id)}
                 >
                   Complete
@@ -173,7 +180,8 @@ export default function TaskCard({
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<EditIcon />}
+                  sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                  startIcon={<EditIcon sx={{color:"#5f33e1"}}/>}
                   onClick={() => onEdit(task.id)}
                 >
                   Edit
@@ -201,6 +209,7 @@ export default function TaskCard({
               <Button
                 variant="outlined"
                 size="small"
+                sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
                 onClick={() => onView(task.id)}
               >
                 View
@@ -215,8 +224,9 @@ export default function TaskCard({
             {onResume && (
               <Button
                 variant="outlined"
+                sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
                 size="small"
-                startIcon={<PlayArrowIcon />}
+                startIcon={<PlayArrowIcon sx={{color:"#5f33e1"}} />}
                 onClick={() => onResume(task.id)}
               >
                 Start/Resume
@@ -226,7 +236,8 @@ export default function TaskCard({
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<EditIcon />}
+                sx={{color:"#5f33e1",borderColor:"#5f33e1"}}
+                startIcon={<EditIcon sx={{color:"#5f33e1"}}/>}
                 onClick={() => onEdit(task.id)}
               >
                 Edit
@@ -252,6 +263,7 @@ export default function TaskCard({
     }
   };
 
+  console.log("got task in TaskCard:", task);
   return (
     <Paper
       sx={{
@@ -292,7 +304,7 @@ export default function TaskCard({
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <AccessTimeIcon sx={{ fontSize: 16, color: "text.secondary" }} />
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {formatTime(task.startDate)}
+            {formatTime(task.actualStart)}
           </Typography>
         </Box>
         <Chip

@@ -151,20 +151,23 @@ export default function CreateTaskPage() {
                   },
                 }}
               >
-                <InputField
-                  label="Task Group"
-                  type="text"
-                  required
-                  errorMessage={errors.group?.message}
-                  {...register("group", { required: "Task group is required" })}
-                />
-                <InputField
-                  label="Project Name"
+
+                  <InputField
+                  label="Task Name"
                   type="text"
                   required
                   errorMessage={errors.title?.message}
-                  {...register("title", { required: "Project name is required" })}
+                  {...register("title", { required: "Task name is required" })}
                 />
+
+                <InputField
+                  label="Project Group"
+                  type="text"
+                  required
+                  errorMessage={errors.group?.message}
+                  {...register("group", { required: "Project group is required" })}
+                />
+              
               </Box>
 
               {/* Row for Description & Priority */}
