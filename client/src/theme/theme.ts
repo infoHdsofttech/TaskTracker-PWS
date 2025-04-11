@@ -14,6 +14,14 @@ declare module '@mui/material/styles' {
       darkPurple?:string,
       lightPurple?:string,
       Indigo?:string,
+      lightOrange?:string,
+      darkOrange?:string,
+      lightBlue?:string,
+      darkBlue?:string,
+      lightGreen?:string,
+      darkGreen?:string,
+      lightPink?:string,
+      darkPink?:string,
       // Add any additional custom color properties here
     };
   }
@@ -30,6 +38,14 @@ declare module '@mui/material/styles' {
       darkPurple?:string,
       lightPurple?:string,
       Indigo?:string,
+      lightOrange?:string,
+      darkOrange?:string,
+      lightBlue?:string,
+      darkBlue?:string,
+      lightGreen?:string,
+      darkGreen?:string,
+      lightPink?:string,
+      darkPink?:string,
       // ... add additional custom color properties here
     };
   }
@@ -50,7 +66,15 @@ export const lightTheme = createTheme({
     backgroundGradientPurple: 'radial-gradient(circle, rgba(244,239,255,1) 0%, rgba(246,242,255,1) 18%, rgba(220,208,244,1) 58%)',
     darkPurple:'#5f33e1',
     lightPurple:'#ede8ff',
-    Indigo:'#4B3B78'
+    Indigo:'#4B3B78',
+    lightOrange:'#ffe9e1',
+    darkOrange:'#ff7d53',
+    lightBlue:'#e3f2ff',
+    darkBlue:'#0087ff',
+    lightGreen:'#ecf4e5',
+    darkGreen:'#99bf6b',
+    lightPink:'#ffe4f2',
+    darkPink:'#f478b8',
     // backgroundGradientPurple: 'linear-gradient(180deg, rgba(244,239,255,1) 0%, rgba(246,242,255,1) 13%, rgba(176,152,219,1) 87%)'
   },
   typography: {
@@ -83,7 +107,15 @@ export const darkTheme = createTheme({
     backgroundGradientPurple: 'linear-gradient(180deg, #f4efff 0%, #f6f2ff 50%, #f9f7ff 100%)',
     darkPurple:'#5f33e1',
     lightPurple:'#ede8ff',
-     Indigo:'#4B3B78'
+     Indigo:'#4B3B78',
+     lightOrange:'#ffe9e1',
+     darkOrange:'#ff7d53',
+     lightBlue:'#e3f2ff',
+     darkBlue:'#0087ff',
+     lightGreen:'#ecf4e5',
+     darkGreen:'#99bf6b',
+     lightPink:'#ffe4f2',
+     darkPink:'#f478b8',
   },
   typography: {
     fontFamily: '"Manrope", sans-serif',

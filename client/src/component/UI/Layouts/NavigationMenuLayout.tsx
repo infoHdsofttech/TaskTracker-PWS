@@ -72,9 +72,6 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
       boxSizing: "border-box",
       backgroundColor: "#eef2fc",
       backgroundImage: theme.colors.backgroundGradientPurple,
-
-
-
     },
   }}
 >
