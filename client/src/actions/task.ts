@@ -118,6 +118,17 @@ export const fetchTasksByStatus = async (status: string) => {
   }
 };
 
+// Fetch tasks by status (supports "ALL" to get all tasks)
+export const fetchTasksByMonth = async (month: string) => {
+  try {
+    const response = await api.get(`/task/get-tasks?month=${month}`);
+    return response.data;
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || "Error fetching tasks");
+    throw error;
+  }
+};
+
 // Fetch a single task by its ID
 export const fetchTaskByIdAction = async (id: string) => {
   try {

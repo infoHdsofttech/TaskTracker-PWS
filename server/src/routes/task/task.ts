@@ -217,21 +217,73 @@ taskRouter.post('/defer-task/:id', verifyToken, async (req: Request, res: Respon
   }
 });
 
-// GET Tasks Endpoint: Fetch tasks by status (supports "ALL" to fetch all tasks).
+// // GET Tasks Endpoint: Fetch tasks by status (supports "ALL" to fetch all tasks).
+// taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): Promise<void> => {
+//   const { status } = req.query; // expected values: "TODO", "IN_PROGRESS", "DONE", or "ALL"
+//   const userId = (req as any).userId;
+
+//   if (typeof status !== 'string') {
+//     res.status(400).json({ message: "Status parameter is required" });
+//     return;
+//   }
+
+//   try {
+//     const filter: any = { userId };
+
+//     if (status.toUpperCase() !== "ALL") {
+//       filter.status = status;
+//     }
+
+//     const tasks = await prisma.task.findMany({
+//       where: filter,
+//       orderBy: { createdAt: 'desc' },
+//     });
+
+//     res.status(200).json({ message: "Tasks fetched successfully", tasks });
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching tasks", error });
+//   }
+// });
+
+
 taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): Promise<void> => {
-  const { status } = req.query; // expected values: "TODO", "IN_PROGRESS", "DONE", or "ALL"
+  const { status, month } = req.query; // Expected: status like "TODO", "ALL" or month in "YYYY-MM" format.
   const userId = (req as any).userId;
 
-  if (typeof status !== 'string') {
-    res.status(400).json({ message: "Status parameter is required" });
+  // Require at least one of the query parameters.
+  if (!status && !month) {
+    res.status(400).json({ message: "Either status or month parameter is required" });
     return;
   }
 
   try {
     const filter: any = { userId };
 
-    if (status.toUpperCase() !== "ALL") {
-      filter.status = status;
+    if (month && typeof month === 'string') {
+      // Expect month in "YYYY-MM" format
+      const [yearStr, monthStr] = month.split('-');
+      const yearNum = parseInt(yearStr, 10);
+      const monthNum = parseInt(monthStr, 10);
+
+      if (isNaN(yearNum) || isNaN(monthNum)) {
+        res.status(400).json({ message: "Invalid month format. Expected YYYY-MM" });
+        return;
+      }
+
+      // Create a date range for the month.
+      // For example, for "2025-04" startDate is April 1, 2025 and endDate is April 30, 2025 23:59:59.999
+      const startDate = new Date(yearNum, monthNum - 1, 1);
+      const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+
+      // Use the correct field: plannedStart
+      filter.plannedStart = {
+        gte: startDate,
+        lte: endDate,
+      };
+    } else if (status && typeof status === 'string') {
+      if (status.toUpperCase() !== "ALL") {
+        filter.status = status;
+      }
     }
 
     const tasks = await prisma.task.findMany({

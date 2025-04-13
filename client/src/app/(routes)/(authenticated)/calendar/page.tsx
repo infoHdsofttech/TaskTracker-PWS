@@ -1,26 +1,19 @@
 // src/pages/CalendarPage.tsx
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { Box, Modal, Typography } from "@mui/material";
-import TaskCalendar from "@/component/UI/TaskCalendar/TaskCalendar";
-import { fetchTasksByStatus } from "@/actions/task";
+import TaskCalendar, { Task } from "@/component/UI/TaskCalendar/TaskCalendar";
+import { fetchTasksByMonth } from "@/actions/task"; // Now using fetchTasksByMonth
 import { format } from "date-fns";
 
-export interface Task {
-  id: string;
-  title: string;
-  startDate?: string;
-  // ... other properties
-}
-
-const Calendar: React.FC = () => {
+const CalendarPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [tasksByDate, setTasksByDate] = useState<Record<string, Task[]>>({});
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
 
-  // Modal open/close
+  // Modal open/close handlers
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -28,44 +21,31 @@ const Calendar: React.FC = () => {
     setSelectedDayTasks([]);
   };
 
-  // Fetch tasks on mount
+  // Fetch tasks on mount for the current month
   useEffect(() => {
-    const fetchAllTasks = async () => {
+    const fetchTasksForCurrentMonth = async () => {
       try {
-        const data = await fetchTasksByStatus("ALL"); // or create a dedicated fetch method
+        // Format today's date into "YYYY-MM" (e.g. "2025-04")
+        const currentMonth = format(new Date(), "yyyy-MM");
+        const data = await fetchTasksByMonth(currentMonth);
         setTasks(data?.tasks || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
     };
-    fetchAllTasks();
+    fetchTasksForCurrentMonth();
   }, []);
 
-  // Whenever tasks change, group them by date
-  useEffect(() => {
-    const tasksMap: Record<string, Task[]> = {};
-
-    tasks.forEach((task) => {
-      if (!task.startDate) return;
-
-      // Convert the startDate to just "yyyy-MM-dd"
-      const dateKey = format(new Date(task.startDate), "yyyy-MM-dd");
-      if (!tasksMap[dateKey]) tasksMap[dateKey] = [];
-      tasksMap[dateKey].push(task);
-    });
-
-    setTasksByDate(tasksMap);
-  }, [tasks]);
-
-  // Clicking a date in the calendar
+  // When a date is clicked in the calendar, filter tasks that occur on that day.
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
-
-    const dateKey = format(date, "yyyy-MM-dd");
-    const tasksForThisDay = tasksByDate[dateKey] || [];
-    setSelectedDayTasks(tasksForThisDay);
-
-    // If tasks are found, show the modal (or you could open a panel instead)
+    // Format the clicked date as "YYYY-MM-dd"
+    const clickedDayKey = format(date, "yyyy-MM-dd");
+    const tasksForDay = tasks.filter(task => {
+      if (!task.startDate) return false;
+      return format(new Date(task.startDate), "yyyy-MM-dd") === clickedDayKey;
+    });
+    setSelectedDayTasks(tasksForDay);
     handleOpen();
   };
 
@@ -75,13 +55,10 @@ const Calendar: React.FC = () => {
         Calendar
       </Typography>
 
-      {/* Calendar Display */}
-      <TaskCalendar
-        tasksByDate={tasksByDate}
-        onDateClick={handleDateClick}
-      />
+      {/* Render TaskCalendar with the tasks array and day click handler */}
+      <TaskCalendar tasks={tasks} onDateClick={handleDateClick} />
 
-      {/* Modal to show tasks for the selected day */}
+      {/* Modal to show tasks for the selected date */}
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -101,7 +78,7 @@ const Calendar: React.FC = () => {
               ? `Tasks for ${format(selectedDate, "dd MMM yyyy")}`
               : "Tasks"}
           </Typography>
-          
+
           {selectedDayTasks.length > 0 ? (
             selectedDayTasks.map((task) => (
               <Box
@@ -114,7 +91,7 @@ const Calendar: React.FC = () => {
                 }}
               >
                 <Typography variant="subtitle1">{task.title}</Typography>
-                {/* Display more details as needed */}
+                {/* You can add more task details as needed */}
               </Box>
             ))
           ) : (
@@ -128,4 +105,4 @@ const Calendar: React.FC = () => {
   );
 };
 
-export default Calendar;
+export default CalendarPage;

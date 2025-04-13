@@ -1,141 +1,118 @@
-// src/components/CalendarComponent.tsx
-import React, { useState } from "react";
-import { Box, Grid, IconButton, Typography } from "@mui/material";
-import { Theme } from '@mui/material/styles';
-import { SxProps } from '@mui/system';
-import { addMonths, subMonths, format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from "date-fns";
-import ArrowLeftIcon from "@mui/icons-material/ChevronLeft";
-import ArrowRightIcon from "@mui/icons-material/ChevronRight";
+// src/component/UI/TaskCalendar/TaskCalendar.tsx
+"use client";
 
-interface TaskData {
+import React from 'react';
+import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { enUS } from 'date-fns/locale/en-US';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { fetchTasksByMonth } from '@/actions/task'; // adjust the path as needed
+
+const locales = {
+  'en-US': enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+// Define your Task type (adjust fields as needed)
+export type Task = {
   id: string;
   title: string;
   startDate?: string;
-  // ... other task properties
-}
+  // Add other properties if needed
+};
 
-export interface TaskCalendarProps {
-  tasksByDate: Record<string, TaskData[]>;
+// You can pass an array of tasks as events.
+export type TaskCalendarProps = {
+  tasks: Task[];
   onDateClick?: (date: Date) => void;
-}
+};
 
-/**
- * A simple monthly calendar component that displays dots on dates that have tasks.
- * @param tasksByDate - A record of dates (YYYY-MM-DD) to tasks.
- * @param onDateClick - Callback when user clicks a date.
- */
-const TaskCalendar: React.FC<TaskCalendarProps> = ({
-  tasksByDate,
-  onDateClick,
-}) => {
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick }) => {
+  // Convert each task with a valid startDate to an all-day event.
+  // If a task does not have a startDate, skip it.
+  const events = tasks
+    .filter(task => task.startDate)
+    .map(task => {
+      const start = new Date(task.startDate!);
+      // Assume an all-day event lasts until the end of that day.
+      const end = new Date(task.startDate!);
+      end.setHours(23, 59, 59, 999);
+      return {
+        id: task.id,
+        title: task.title, // You can set title to "" if you want to show only a dot.
+        start,
+        end,
+        allDay: true,
+      };
+    });
 
-  // Navigate to previous/next month
-  const handlePrevMonth = () => {
-    setCurrentDate((prev) => subMonths(prev, 1));
+  // Custom event component that renders a small dot.
+  const CustomEvent = () => {
+    return (
+      <div
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          backgroundColor: '#5f33e1',
+          margin: '0 auto',
+        }}
+      ></div>
+    );
   };
-  const handleNextMonth = () => {
-    setCurrentDate((prev) => addMonths(prev, 1));
+
+  // onRangeChange is fired whenever the visible date range changes (e.g. user navigates to a new month)
+  const handleRangeChange = async (range: Date[] | { start: Date; end: Date }) => {
+    // Determine the month from the range.
+    let month: string;
+    if (Array.isArray(range) && range.length > 0) {
+      // For month view, the first date of the array will work.
+      month = format(range[0], "yyyy-MM");
+    } else if (!Array.isArray(range)) {
+      // Some views return an object with start and end.
+      month = format(range.start, "yyyy-MM");
+    } else {
+      return;
+    }
+
+    try {
+      // Fetch tasks for the month and log them.
+      const data = await fetchTasksByMonth(month);
+      console.log(`Fetched tasks for month ${month}:`, data);
+    } catch (error) {
+      console.error("Error fetching tasks for month", month, error);
+    }
   };
-
-  // Prepare day cells for the current month view
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-
-  // The first date that should appear in the calendar grid
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-  // The last date that should appear in the calendar grid
-  const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-
-  let day = startDate;
-  const calendarDays: Date[] = [];
-
-  while (day <= endDate) {
-    calendarDays.push(day);
-    day = addDays(day, 1);
-  }
 
   return (
-    <Box>
-      {/* Month + Year header with navigation */}
-      <Box 
-        display="flex" 
-        alignItems="center" 
-        justifyContent="space-between" 
-        mb={2}
-      >
-        <IconButton onClick={handlePrevMonth}>
-          <ArrowLeftIcon />
-        </IconButton>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {format(currentDate, "dd MMM yyyy")}
-        </Typography>
-        <IconButton onClick={handleNextMonth}>
-          <ArrowRightIcon />
-        </IconButton>
-      </Box>
-
-      {/* Days of the week header */}
-          <Grid component="div" item xs={1.7142857} textAlign="center" >
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <Grid item xs={1.7142857} textAlign="center" key={d}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {d}
-            </Typography>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Calendar grid */}
-      <Grid container>
-        {calendarDays.map((dateItem) => {
-          const formatted = format(dateItem, "yyyy-MM-dd");
-          const tasksForDay = tasksByDate[formatted] || [];
-          const isCurrentMonth = isSameMonth(dateItem, monthStart);
-
-          return (
-            <Grid
-              item
-              xs={1.7142857}
-              key={formatted}
-              onClick={() => onDateClick && onDateClick(dateItem)}
-              sx={{
-                border: "1px solid transparent",
-                minHeight: 60,
-                cursor: "pointer",
-                backgroundColor: isSameDay(dateItem, new Date()) 
-                  ? "rgba(95, 51, 225, 0.1)"  // highlight current day if you want
-                  : "transparent",
-                color: isCurrentMonth ? "inherit" : "text.disabled",
-                "&:hover": {
-                  backgroundColor: "rgba(95, 51, 225, 0.05)",
-                },
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                {format(dateItem, "d")}
-              </Typography>
-
-              {/* If tasks exist for this day, show a dot (or multiple) */}
-              {tasksForDay.length > 0 && (
-                <Box
-                  sx={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    backgroundColor: "#5f33e1",
-                  }}
-                />
-              )}
-            </Grid>
-          );
-        })}
-      </Grid>
-    </Box>
+    <div style={{ height: '800px' }}>
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        defaultView="month"
+        views={['month']}
+        selectable
+        // When a day (slot) is selected, call the provided callback.
+        onSelectSlot={(slotInfo: SlotInfo) => {
+          if (onDateClick) {
+            onDateClick(slotInfo.start);
+          }
+        }}
+        // onRangeChange will be called when the calendar view changes (e.g., when navigating months)
+        onRangeChange={handleRangeChange}
+        // Render all events using the custom dot-only component.
+        components={{ event: CustomEvent }}
+      />
+    </div>
   );
 };
 
