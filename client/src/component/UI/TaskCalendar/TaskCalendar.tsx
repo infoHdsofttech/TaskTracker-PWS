@@ -1,4 +1,3 @@
-// src/component/UI/TaskCalendar/TaskCalendar.tsx
 "use client";
 
 import React from 'react';
@@ -6,7 +5,6 @@ import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { fetchTasksByMonth } from '@/actions/task'; // adjust the path as needed
 
 const locales = {
   'en-US': enUS,
@@ -25,18 +23,17 @@ export type Task = {
   id: string;
   title: string;
   startDate?: string;
-  // Add other properties if needed
 };
 
-// You can pass an array of tasks as events.
+// Extend props to accept navigation callback
 export type TaskCalendarProps = {
   tasks: Task[];
   onDateClick?: (date: Date) => void;
+  onNavigate?: (date: Date, view: string, action: string) => void;
 };
 
-const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick }) => {
+const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick, onNavigate }) => {
   // Convert each task with a valid startDate to an all-day event.
-  // If a task does not have a startDate, skip it.
   const events = tasks
     .filter(task => task.startDate)
     .map(task => {
@@ -46,7 +43,7 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick }) => {
       end.setHours(23, 59, 59, 999);
       return {
         id: task.id,
-        title: task.title, // You can set title to "" if you want to show only a dot.
+        title: task.title, // If you want an empty dot, you can set title: "".
         start,
         end,
         allDay: true,
@@ -68,29 +65,6 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick }) => {
     );
   };
 
-  // onRangeChange is fired whenever the visible date range changes (e.g. user navigates to a new month)
-  const handleRangeChange = async (range: Date[] | { start: Date; end: Date }) => {
-    // Determine the month from the range.
-    let month: string;
-    if (Array.isArray(range) && range.length > 0) {
-      // For month view, the first date of the array will work.
-      month = format(range[0], "yyyy-MM");
-    } else if (!Array.isArray(range)) {
-      // Some views return an object with start and end.
-      month = format(range.start, "yyyy-MM");
-    } else {
-      return;
-    }
-
-    try {
-      // Fetch tasks for the month and log them.
-      const data = await fetchTasksByMonth(month);
-      console.log(`Fetched tasks for month ${month}:`, data);
-    } catch (error) {
-      console.error("Error fetching tasks for month", month, error);
-    }
-  };
-
   return (
     <div style={{ height: '800px' }}>
       <Calendar
@@ -100,16 +74,19 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick }) => {
         endAccessor="end"
         defaultView="month"
         views={['month']}
+        toolbar
         selectable
-        // When a day (slot) is selected, call the provided callback.
         onSelectSlot={(slotInfo: SlotInfo) => {
           if (onDateClick) {
             onDateClick(slotInfo.start);
           }
         }}
-        // onRangeChange will be called when the calendar view changes (e.g., when navigating months)
-        onRangeChange={handleRangeChange}
-        // Render all events using the custom dot-only component.
+        // onNavigate will be called when the user clicks next/prev/today.
+        onNavigate={(date, view, action) => {
+          if (onNavigate) {
+            onNavigate(date, view, action);
+          }
+        }}
         components={{ event: CustomEvent }}
       />
     </div>

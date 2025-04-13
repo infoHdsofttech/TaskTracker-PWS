@@ -1,10 +1,9 @@
-// src/pages/CalendarPage.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { Box, Modal, Typography } from "@mui/material";
 import TaskCalendar, { Task } from "@/component/UI/TaskCalendar/TaskCalendar";
-import { fetchTasksByMonth } from "@/actions/task"; // Now using fetchTasksByMonth
+import { fetchTasksByMonth } from "@/actions/task";
 import { format } from "date-fns";
 
 const CalendarPage: React.FC = () => {
@@ -13,7 +12,6 @@ const CalendarPage: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
 
-  // Modal open/close handlers
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -21,22 +19,32 @@ const CalendarPage: React.FC = () => {
     setSelectedDayTasks([]);
   };
 
-  // Fetch tasks on mount for the current month
+  // Fetch tasks for a given month string ("YYYY-MM")
+  const fetchTasksForMonth = async (month: string) => {
+    try {
+      const data = await fetchTasksByMonth(month);
+      console.log(`Fetched tasks for month ${month}:`, data);
+      setTasks(data?.tasks || []);
+    } catch (error) {
+      console.error("Error fetching tasks for month", month, error);
+    }
+  };
+
+  // Initial fetch for the current month
   useEffect(() => {
-    const fetchTasksForCurrentMonth = async () => {
-      try {
-        // Format today's date into "YYYY-MM" (e.g. "2025-04")
-        const currentMonth = format(new Date(), "yyyy-MM");
-        const data = await fetchTasksByMonth(currentMonth);
-        setTasks(data?.tasks || []);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
-    fetchTasksForCurrentMonth();
+    const currentMonth = format(new Date(), "yyyy-MM"); // e.g., "2025-04"
+    fetchTasksForMonth(currentMonth);
   }, []);
 
-  // When a date is clicked in the calendar, filter tasks that occur on that day.
+  // When the calendar navigates (next, prev, today), this callback is triggered.
+  const handleCalendarNavigate = (date: Date, view: string, action: string) => {
+    // For month view, the navigated date represents the first day of the new month.
+    // Format that date as "YYYY-MM" to fetch tasks for that month.
+    const month = format(date, "yyyy-MM");
+    fetchTasksForMonth(month);
+  };
+
+  // When a date is clicked in the calendar, filter tasks for that day.
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
     // Format the clicked date as "YYYY-MM-dd"
@@ -55,10 +63,14 @@ const CalendarPage: React.FC = () => {
         Calendar
       </Typography>
 
-      {/* Render TaskCalendar with the tasks array and day click handler */}
-      <TaskCalendar tasks={tasks} onDateClick={handleDateClick} />
+      {/* Pass the onNavigate callback to update tasks when navigating */}
+      <TaskCalendar
+        tasks={tasks}
+        onDateClick={handleDateClick}
+        onNavigate={handleCalendarNavigate}
+      />
 
-      {/* Modal to show tasks for the selected date */}
+      {/* Modal to display tasks for the selected day */}
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -91,7 +103,6 @@ const CalendarPage: React.FC = () => {
                 }}
               >
                 <Typography variant="subtitle1">{task.title}</Typography>
-                {/* You can add more task details as needed */}
               </Box>
             ))
           ) : (
