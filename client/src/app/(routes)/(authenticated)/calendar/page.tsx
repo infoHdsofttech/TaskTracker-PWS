@@ -50,8 +50,8 @@ const CalendarPage: React.FC = () => {
     // Format the clicked date as "YYYY-MM-dd"
     const clickedDayKey = format(date, "yyyy-MM-dd");
     const tasksForDay = tasks.filter(task => {
-      if (!task.startDate) return false;
-      return format(new Date(task.startDate), "yyyy-MM-dd") === clickedDayKey;
+      if (!task.plannedStart) return false;
+      return format(new Date(task.plannedStart), "yyyy-MM-dd") === clickedDayKey;
     });
     setSelectedDayTasks(tasksForDay);
     handleOpen();
@@ -117,3 +117,8 @@ const CalendarPage: React.FC = () => {
 };
 
 export default CalendarPage;
+
+
+
+
+

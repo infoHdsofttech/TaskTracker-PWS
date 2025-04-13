@@ -22,7 +22,7 @@ const localizer = dateFnsLocalizer({
 export type Task = {
   id: string;
   title: string;
-  startDate?: string;
+  plannedStart?: string;
 };
 
 // Extend props to accept navigation callback
@@ -35,11 +35,11 @@ export type TaskCalendarProps = {
 const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick, onNavigate }) => {
   // Convert each task with a valid startDate to an all-day event.
   const events = tasks
-    .filter(task => task.startDate)
+    .filter(task => task.plannedStart)
     .map(task => {
-      const start = new Date(task.startDate!);
+      const start = new Date(task.plannedStart!);
       // Assume an all-day event lasts until the end of that day.
-      const end = new Date(task.startDate!);
+      const end = new Date(task.plannedStart!);
       end.setHours(23, 59, 59, 999);
       return {
         id: task.id,
@@ -82,7 +82,7 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, onDateClick, onNavig
           }
         }}
         // onNavigate will be called when the user clicks next/prev/today.
-        onNavigate={(date, view, action) => {
+        onNavigate={(date:Date, view:string, action:string) => {
           if (onNavigate) {
             onNavigate(date, view, action);
           }

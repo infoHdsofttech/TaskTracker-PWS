@@ -1,6 +1,6 @@
 //@ts-nocheck
 "use client";
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import {
   useMediaQuery,
   Theme,
@@ -12,6 +12,7 @@ import {
   List,
   useTheme,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
@@ -21,7 +22,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import EventIcon from "@mui/icons-material/Event";
 import DescriptionIcon from "@mui/icons-material/Description";
 import GroupIcon from "@mui/icons-material/Group";
-import AddTaskIcon from '@mui/icons-material/AddTask';
+import AddTaskIcon from "@mui/icons-material/AddTask";
 import { CalendarViewDay } from "@mui/icons-material";
 interface LayoutProps {
   children: React.ReactNode;
@@ -51,7 +52,7 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
   //         maximumAge: 0,
   //       }
   //     );
-  
+
   //     return () => navigator.geolocation.clearWatch(watchId);
   //   } else {
   //     console.warn("Geolocation is not supported by this browser.");
@@ -62,49 +63,51 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
     // Desktop Layout: Permanent Drawer on the left
     return (
       <Box sx={{ display: "flex" }}>
-       <Drawer
-  variant="permanent"
-  sx={{
-    width: 240,
-    flexShrink: 0,
-    "& .MuiDrawer-paper": {
-      width: 240,
-      boxSizing: "border-box",
-      backgroundColor: "#eef2fc",
-      backgroundImage: theme.colors.backgroundGradientPurple,
-    },
-  }}
->
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: 240,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: 240,
+              boxSizing: "border-box",
+              backgroundColor: "#eef2fc",
+              backgroundImage: theme.colors.backgroundGradientPurple,
+            },
+          }}
+        >
           {/* Drawer content here */}
-          <Box sx={{ p: 2  }}>
-            <Typography variant="h6" color={theme.colors.Indigo}>Task Tracker</Typography>
-            <List  sx={{color:theme.colors.Indigo}}>
-            <ListItem button onClick={() => router.push("/home")}>
+          <Box sx={{ p: 2 }}>
+            <Typography variant="h6" color={theme.colors.Indigo}>
+              Task Tracker
+            </Typography>
+            <List sx={{ color: theme.colors.Indigo }}>
+              <ListItemButton onClick={() => router.push("/home")}>
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
                 <ListItemText primary="Home" />
-              </ListItem>
-            
-              <ListItem button onClick={() => router.push("/create-task")}>
+              </ListItemButton>
+
+              <ListItemButton onClick={() => router.push("/create-task")}>
                 <ListItemIcon>
-                 <AddTaskIcon /> 
+                  <AddTaskIcon />
                 </ListItemIcon>
 
                 <ListItemText primary="Add Task" />
-              </ListItem>
-              <ListItem button>
+              </ListItemButton>
+              <ListItemButton onClick={() => router.push("/calendar")}>
                 <ListItemIcon>
                   <EventIcon />
                 </ListItemIcon>
                 <ListItemText primary="Calendar" />
-              </ListItem>
-              <ListItem button>
+              </ListItemButton>
+              <ListItemButton>
                 <ListItemIcon>
                   <GroupIcon />
                 </ListItemIcon>
                 <ListItemText primary="Team" />
-              </ListItem>
+              </ListItemButton>
             </List>
           </Box>
         </Drawer>
@@ -117,8 +120,13 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
   } else {
     // Mobile Layout: Bottom Navigation always visible
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Box component="main" sx={{ flexGrow: 1, mb: 8 /* space for bottom nav */ }}>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, mb: 8 /* space for bottom nav */ }}
+        >
           {children}
         </Box>
 
@@ -129,16 +137,32 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
             bottom: 0,
             left: 0,
             right: 0,
-           
           }}
           elevation={3}
         >
-          <BottomNavigation showLabels sx={{       backgroundColor: "#eef2fc",
-      backgroundImage: "linear-gradient(61deg, #eef2fc 0%, #d3bcea 100%)",
-             }}>
-            <BottomNavigationAction label="Home" icon={<HomeIcon />} onClick={() => router.push("/home")}/>
-            <BottomNavigationAction label="Calendar" icon={<EventIcon />} onClick={() => router.push("/create-task")} />
-            <BottomNavigationAction label="AddTask" icon={        <AddTaskIcon />}   onClick={() => router.push("/create-task")} />
+          <BottomNavigation
+            showLabels
+            sx={{
+              backgroundColor: "#eef2fc",
+              backgroundImage:
+                "linear-gradient(61deg, #eef2fc 0%, #d3bcea 100%)",
+            }}
+          >
+            <BottomNavigationAction
+              label="Home"
+              icon={<HomeIcon />}
+              onClick={() => router.push("/home")}
+            />
+            <BottomNavigationAction
+              label="Calendar"
+              icon={<EventIcon />}
+              onClick={() => router.push("/calendar")}
+            />
+            <BottomNavigationAction
+              label="AddTask"
+              icon={<AddTaskIcon />}
+              onClick={() => router.push("/create-task")}
+            />
             <BottomNavigationAction label="Team" icon={<GroupIcon />} />
           </BottomNavigation>
         </Paper>
