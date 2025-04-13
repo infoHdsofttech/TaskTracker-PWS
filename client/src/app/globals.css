@@ -15,3 +15,32 @@ body {
   /* This ensures the browser uses Manrope if nothing else overrides it */
   font-family: '"Manrope", sans-serif',
 }
+
+.rbc-event-allday{
+  background-color: #7F56D9 !important;
+}
+
+/* .rbc-btn-group{
+  background-color: rgb(95,51,225) !important;
+  color:white !important;
+  border-radius: 5px !important;
+  border: none !important;
+  padding: 5px !important;  
+} */
+
+.rbc-btn-group button{
+  /* background-color: rgb(95,51,225) !important; */
+  background-color: transparent !important;
+  color:rgb(95,51,225) !important;
+  border-radius: 5px !important;
+  border: 1px solid rgb(95,51,225) !important;
+  padding: 10px !important;  
+  margin: 0 5px !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  width: 5rem !important;
+}
+
+.rbc-toolbar-label{
+  font-family: 'Manrope' !important
+} 

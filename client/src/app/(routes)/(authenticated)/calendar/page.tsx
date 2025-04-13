@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Box, Modal, Typography } from "@mui/material";
+import { Box, Modal, Typography,useTheme } from "@mui/material";
 import TaskCalendar, { Task } from "@/component/UI/TaskCalendar/TaskCalendar";
 import { fetchTasksByMonth } from "@/actions/task";
 import { format } from "date-fns";
@@ -11,7 +11,7 @@ const CalendarPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
-
+const theme = useTheme();
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -58,7 +58,11 @@ const CalendarPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3,
+      backgroundImage: theme.colors.backgroundGradientYellow,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+     }}>
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Calendar
       </Typography>
