@@ -13,10 +13,12 @@ import {
 } from "@/actions/task";
 import { TaskContext } from "@/component/context/TaskContext";
 import ButtonInput from "@/component/UI/ButtonInput/ButtonInput";
+import { useUser } from "@/component/context/UserContext";
 
 export default function Home() {
   const theme = useTheme();
   const router = useRouter();
+  const { user, loading } = useUser();
 
   const { setEditingTask, setTaskActionType, setTaskId, setTaskName, setTaskData } = useContext(TaskContext)!;
   
@@ -116,9 +118,11 @@ export default function Home() {
       <Box sx={{ p: 2 }}>
         {/* Greeting */}
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <Avatar src="/profile.jpg" alt="Profile" sx={{ width: 48, height: 48 }} />
+          <Avatar src="/profile.jpg" alt="Profile" sx={{ width: 48, height: 48 }}>
+            {loading ? "?" : (user?.name?.[0]?.toUpperCase() || "U")}
+          </Avatar>
           <Typography variant="h6" sx={{ ml: 2 }}>
-            Hello, Livia Vaccaro
+            {loading ? "Loading..." : `Hello, ${user?.name || "User"}`}
           </Typography>
         </Box>
         {/* Task Completion Card */}

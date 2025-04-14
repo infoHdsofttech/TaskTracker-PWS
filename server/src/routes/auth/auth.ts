@@ -2,11 +2,37 @@ import express, { Request, response, Response } from 'express';
 import bcrypt from 'bcryptjs';  // Hashing passwords
 import jwt from 'jsonwebtoken'; // Generating JWT token
 import prisma from '../../lib/prisma';
+import verifyToken from '../../middlewares/Authenticate';
 
 const authRouter = express.Router();
 const SECRET_KEY = "supersecretkey"; // Replace with env variable
 
 
+authRouter.get("/user", verifyToken, async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Assuming your verifyToken middleware attaches userId to req.
+      const userId = (req as any).userId;
+  
+      // Fetch the user details from the database. You can include
+      // related fields if needed.
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        // Optionally: include relationships, e.g.
+        // include: { projects: true, societyMembers: true },
+      });
+  
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+  
+      res.status(200).json(user);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      res.status(500).json({ message: "Error fetching user data", error });
+    }
+  });
+  
 authRouter.post('/signup', async (req: Request, res: Response): Promise<any>=> {
     const { name,email, password } = req.body;
 

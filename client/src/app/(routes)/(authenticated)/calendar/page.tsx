@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import InputField from "@/component/UI/InputField/InputField";
 import { createProjectAction } from "@/actions/project";
 import { projectSchema } from "@/lib/zod/project";
-import ProjectCrud from "@/component/ProjectCRUD/ProjectCrud";
+import ProjectCrud from "@/component/UI/ProjectCRUD/ProjectCrud";
 
 
 

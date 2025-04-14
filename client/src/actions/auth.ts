@@ -60,3 +60,15 @@ export const loginAction = async (data: LogininAuthData) => {
     return err;
   }
 };
+
+export const fetchLoggedInUserdata = async () => {
+  try {
+    const response = await api.get('/auth/user');
+    console.log('User response:', response.data);
+    // Optionally, perform any transformation of response.data if needed.
+    return response.data;
+  } catch (err: any) {
+    console.error("Error fetching user data:", err);
+    return null;
+  }
+};

@@ -13,7 +13,7 @@ import {
 } from "@/actions/project";
 
 import { ProjectFormData, projectSchema } from "@/lib/zod/project";
-import InputField from "../UI/InputField/InputField";
+import InputField from "../InputField/InputField";
 
 const ProjectCrud: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);

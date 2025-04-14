@@ -32,6 +32,7 @@ import { TaskContext } from "@/component/context/TaskContext";
 // Custom UI
 import InputField from "@/component/UI/InputField/InputField";
 import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
+import DateInputField from "@/component/UI/DateInputField/DateInputField";
 
 export default function CreateTaskPage() {
   const theme = useTheme();
@@ -235,16 +236,23 @@ export default function CreateTaskPage() {
                   flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                 }}
               >
-                <InputField
-                  label="Planned Start Date"
-                  type="date"
-                  {...register("startDate")}
-                />
-                <InputField
-                  label="Planned End Date"
-                  type="date"
-                  {...register("endDate")}
-                />
+              <DateInputField
+  label="Planned Start Date"
+  {...register("startDate")}
+  errorMessage={errors.startDate?.message}
+  // Pass disabledDates if you want to disable the date input:
+  // disabledDates={taskData.status === "COMPLETED" ? true : false}
+  disabledDates={(taskData?.status === "COMPLETED" || taskData?.status === "IN_PROGRESS" || taskData?.status === "DEFERRED") ? true : false}
+/>
+
+<DateInputField
+  label="Planned End Date"
+  {...register("endDate")}
+  errorMessage={errors.endDate?.message}
+  // Pass disabledDates if you want to disable the date input:
+  disabledDates={(taskData?.status === "COMPLETED" || taskData?.status === "IN_PROGRESS" || taskData?.status === "DEFERRED") ? true : false}
+/>
+          
               </Box>
 
               {/* Row for Estimated Time */}
