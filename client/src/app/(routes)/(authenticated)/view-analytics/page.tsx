@@ -1,20 +1,7 @@
+// AnalyticsDashboard.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  BarChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Bar,
-  LineChart,
-  Line,
-} from "recharts";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
@@ -25,7 +12,15 @@ import {
   fetchProjectDistribution,
 } from "@/actions/analytics";
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50"];
+// Import the separate chart components
+import StatusPieChart from "@/component/UI/Analytics/PieChart";
+import ProjectDistributionPieChart from "@/component/UI/Analytics//ProjectDistributionPieChart";
+import TimeComparisonBarChart from "@/component/UI/Analytics//TimeComparisonBarChart";
+import ProjectTimeComparisonBarChart from "@/component/UI/Analytics/ProjectTimeComparisonBarChart";
+import CompletionTimelineLineChart from "@/component/UI/Analytics/CompletionTimelineLineChart";
+import { Box, Typography } from "@mui/material";
+
+import Grid from '@mui/material/Grid';
 
 export default function AnalyticsDashboard() {
   const [taskData, setTaskData] = useState([]);
@@ -38,7 +33,7 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [summary, status, time, timeline,projectDist] = await Promise.all([
+        const [summary, status, time, timeline, projectDist] = await Promise.all([
           fetchTaskSummary(),
           fetchStatusDistribution(),
           fetchTimeComparison(),
@@ -46,37 +41,37 @@ export default function AnalyticsDashboard() {
           fetchProjectDistribution(),
         ]);
 
-        console.log("Summary response:", summary);
-        console.log("Status response:", status);
-        console.log("Time response:", time);
-        console.log("Timeline response:", timeline);
-        console.log("Project Distribution response:", projectDist);
+        // console.log("Summary response:", summary);
+        // console.log("Status response:", status);
+        // console.log("Time response:", time);
+        // console.log("Timeline response:", timeline);
+        // console.log("Project Distribution response:", projectDist);
 
         // If summary is an array of tasks directly:
         setTaskData(Array.isArray(summary) ? summary : summary?.tasks ?? []);
 
-        // If status is an array of objects (NOT nested):
-        // e.g. [{ name: "COMPLETED", value: 4.83 }]
-        // If it’s double-bracketed, flatten or take the first index.
-        const safeStatusData = Array.isArray(status) && Array.isArray(status[0])
-          ? status[0] // or status.flat() if needed
-          : status;
+        // For status data (flatten if nested):
+        const safeStatusData =
+          Array.isArray(status) && Array.isArray(status[0])
+            ? status[0]
+            : status;
         setStatusData(safeStatusData ?? []);
 
-        // For time data, if it’s an array of arrays:
-        // e.g. [ [ { name: "...", Completed: 3.76, ... } ] ]
-        const safeTimeData = Array.isArray(time) && Array.isArray(time[0])
-          ? time[0]
-          : time;
+        // For time data (flatten if needed):
+        const safeTimeData =
+          Array.isArray(time) && Array.isArray(time[0])
+            ? time[0]
+            : time;
         setTimeData(safeTimeData ?? []);
 
-        // Same for timeline
-        const safeTimelineData = Array.isArray(timeline) && Array.isArray(timeline[0])
-          ? timeline[0]
-          : timeline;
+        // For timeline data (flatten if needed):
+        const safeTimelineData =
+          Array.isArray(timeline) && Array.isArray(timeline[0])
+            ? timeline[0]
+            : timeline;
         setTimelineData(safeTimelineData ?? []);
 
-        // Same for projectDist
+        // For project distribution data (flatten if needed):
         setProjectDistData(
           Array.isArray(projectDist) && Array.isArray(projectDist[0])
             ? projectDist[0]
@@ -100,116 +95,37 @@ export default function AnalyticsDashboard() {
   };
 
   if (loading) {
-    return <p style={{ padding: 20 }}>Loading dashboard...</p>;
+    return <Typography sx={{ padding: 20 }}>Loading dashboard...</Typography>;
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Task Analytics Dashboard</h2>
-
+    <Box sx={{ padding: { xs: 2, md: 4 } }}>
+      <Typography variant="h2" sx={{ mb: 2 }}></Typography>
       <button onClick={exportToExcel} style={{ marginBottom: 20 }}>
-        Download Excel
+      Download Excel
       </button>
-
-      {/* P I E  C H A R T */}
-      <h3>Status-wise Count</h3>
-      <PieChart width={400} height={300}>
-        <Pie
-          data={statusData}
-          dataKey="value"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={100}
-          label
-        >
-          {statusData.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={COLORS[index % COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-        <Legend />
-      </PieChart>
-
-{/* PIE CHART: Project Distribution */}
-<h3>Project Distribution</h3>
-      <PieChart width={400} height={300}>
-      <Pie
-  data={projectDistData}
-  dataKey="completedTime"     // match your existing field
-  nameKey="projectName"       // match your existing field
-  cx="50%"
-  cy="50%"
-  outerRadius={100}
-  label
->
-  {projectDistData.map((entry, index) => (
-    <Cell
-      key={`cell-project-${index}`}
-      fill={COLORS[index % COLORS.length]}
-    />
-  ))}
-</Pie>
-
-        <Tooltip />
-        <Legend />
-      </PieChart>
-
       
+      <Grid container spacing={3}>
+        <Grid  size={{ xs: 12, md: 6 }}>
+          <StatusPieChart data={statusData} />
+        </Grid>
+        <Grid  size={{ xs: 12, md: 6 }}>
+        <ProjectDistributionPieChart data={projectDistData} />
+        </Grid>
 
+        <Grid  size={{ xs: 12, md: 6 }}>
+        <TimeComparisonBarChart data={timeData} />
+        </Grid>
+        <Grid  size={{ xs: 12, md: 6 }}>
+        <ProjectTimeComparisonBarChart data={projectDistData} />
+        </Grid>
 
-      {/* B A R  C H A R T */}
-      <h3>Estimated vs Completed Time</h3>
-      <BarChart width={600} height={300} data={timeData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="Estimated" fill="#8884d8" />
-        <Bar dataKey="Completed" fill="#82ca9d" />
-       
-      </BarChart>
+        <Grid  size={{ xs: 12, md: 6 }}>
+        <CompletionTimelineLineChart data={timelineData} />
+        </Grid>
 
- {/* BAR CHART: Estimated vs Completed Time on a Project Basis */}
- <h3>Project Time Comparison</h3>
-      <BarChart width={600} height={300} data={projectDistData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="projectName" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar
-          dataKey="estimatedTime"
-          fill="#8884d8"
-          name="Estimated Time"
-        />
-        <Bar
-          dataKey="completedTime"
-          fill="#82ca9d"
-          name="Completed Time"
-        />
-       
-      </BarChart>
-
-      {/* L I N E  C H A R T */}
-      <h3>Completion Timeline</h3>
-      <LineChart width={600} height={300} data={timelineData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="Completed"
-          stroke="#8884d8"
-          strokeWidth={2}
-        />
-      </LineChart>
-    </div>
+      </Grid>
+      
+    </Box>
   );
 }
