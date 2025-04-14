@@ -29,6 +29,9 @@ export type Task = {
   actualEnd?: string;
   isPaused?: boolean;
   completedHours?: string;
+  project: {
+    projectName: string;
+  };
 };
 
 export type TaskCardProps = {
@@ -274,7 +277,7 @@ export default function TaskCard({
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
         {/* Task Group */}
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {task.group || "No Group"}
+          {task.project.projectName || "No Group"}
         </Typography>
         {/* Task Title */}
         <Typography variant="h6" sx={{ fontWeight: 600 }}>

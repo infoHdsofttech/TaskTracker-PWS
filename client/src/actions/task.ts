@@ -4,35 +4,33 @@ import toast from "react-hot-toast";
 import { api } from "./api";
 
 export interface CreateTaskData {
-  group: string;
+  projectId: string; // Renamed from "group"
   title: string;
   description?: string;
   startDate?: string;
   endDate?: string;
   priority?: string;
-
-  estimatedTime?: string; // as hours (string so we can convert later)
+  estimatedTime: number; // Changed from string to number
   status?: string;
   actualStart?: string;
   actualEnd?: string;
   isPaused?: boolean;
-  completedHours?: string;
+  completedHours?: number; // Changed from string to number
 }
 
 export interface UpdateTaskData {
-  group?: string;
+  projectId?: string; // Renamed from "group"
   title?: string;
   description?: string;
   startDate?: string;
   endDate?: string;
   priority?: string;
-
-  estimatedTime?: string; // as hours (string so we can convert later)
+  estimatedTime?: number; // Changed from string to number
   status?: string;
   actualStart?: string;
   actualEnd?: string;
   isPaused?: boolean;
-  completedHours?: string;
+  completedHours?: number; // Changed from string to number
 }
 
 // Create a new task

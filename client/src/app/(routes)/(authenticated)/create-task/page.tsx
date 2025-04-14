@@ -16,7 +16,7 @@ import {
 import { getAllProjectsByUserAction } from "@/actions/project";
 
 // Import the Zod schema and its inferred type.
-import { createTaskSchema,CreateTaskInput} from "@/lib/zod/task";
+import { createTaskSchema, CreateTaskInput } from "@/lib/zod/task";
 
 // Custom UI components
 import InputField from "@/component/UI/InputField/InputField";
@@ -24,8 +24,7 @@ import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSele
 
 // Constant to simulate page mode. Set to true for update mode.
 const isUpdate = false;
-// For update mode, a hardcoded task ID is used (to be replaced later via context).
-// const taskId = "0b347b40-0cd9-4df0-b0e9-458106fb22d9";
+// const taskId = "hardcoded-task-id"; // For update mode
 
 export default function CreateTaskPage() {
   const {
@@ -52,7 +51,6 @@ export default function CreateTaskPage() {
     (async () => {
       try {
         const response = await getAllProjectsByUserAction();
-        // Assuming response contains a "projects" array.
         const options = response.projects.map((project: any) => ({
           value: project.id,
           label: project.projectName,
@@ -80,17 +78,15 @@ export default function CreateTaskPage() {
 
   const [priority, setPriority] = useState("MEDIUM");
 
-  // When in update mode, fetch the task data and prefill the form.
+  // In update mode, fetch the task data and prefill the form.
   useEffect(() => {
     if (isUpdate) {
       (async () => {
         try {
           const response = await fetchTaskByIdAction("hardcoded-task-id");
-          // Assuming the API returns data as { task: { ...taskData } }
           const taskData = response.task;
-          // Reset the form with fetched task data.
           reset({
-            projectId: taskData.projectId, // Updated from "group" to "projectId"
+            projectId: taskData.projectId,
             title: taskData.title,
             description: taskData.description,
             startDate: taskData.plannedStart
@@ -100,7 +96,7 @@ export default function CreateTaskPage() {
               ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
               : "",
             priority: taskData.priority,
-            estimatedTime: taskData.estimatedTime?.toString(),
+            estimatedTime: taskData.estimatedTime,
             status: taskData.status,
             actualStart: taskData.actualStart
               ? new Date(taskData.actualStart).toISOString().split("T")[0]
@@ -109,7 +105,7 @@ export default function CreateTaskPage() {
               ? new Date(taskData.actualEnd).toISOString().split("T")[0]
               : "",
             isPaused: taskData.isPaused,
-            completedHours: taskData.completedHours?.toString(),
+            completedHours: taskData.completedHours,
           });
           setPriority(taskData.priority);
         } catch (error) {
@@ -119,7 +115,7 @@ export default function CreateTaskPage() {
     }
   }, [isUpdate, reset]);
 
-  // onSubmit: If update mode, call updateTaskAction with the hardcoded id.
+  // onSubmit handler.
   const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
     try {
       if (isUpdate) {
@@ -144,20 +140,13 @@ export default function CreateTaskPage() {
       }}
     >
       <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            p: 3,
-            borderRadius: 2,
-            margin: "0 auto",
-          }}
-        >
+        <Box sx={{ p: 3, borderRadius: 2, margin: "0 auto" }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
             {isUpdate ? "Edit Task" : "Add Task"}
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {/* Row for Task Name & Project selection */}
               <Box
                 sx={{
                   display: "flex",
@@ -178,8 +167,6 @@ export default function CreateTaskPage() {
                   errorMessage={errors.title?.message}
                   {...register("title")}
                 />
-
-                {/* Use a dropdown to select a project with the field "projectId" */}
                 <DropDownSelectField
                   label="Project"
                   required
@@ -189,7 +176,6 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              {/* Row for Description & Priority */}
               <Box
                 sx={{
                   display: "flex",
@@ -212,14 +198,13 @@ export default function CreateTaskPage() {
                 <DropDownSelectField
                   label="Priority"
                   required
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
                   options={priorityOptions}
-                  {...register("priority")}
+                  {...register("priority", {
+                    onChange: (e) => setPriority(e.target.value)
+                  })}
                 />
               </Box>
 
-              {/* Row for Planned Start & End Date */}
               <Box
                 sx={{
                   display: "flex",
@@ -245,7 +230,6 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              {/* Row for Estimated Time */}
               <Box sx={{ display: "flex", gap: "5%", flexDirection: "column" }}>
                 <InputField
                   label="Estimated Time (hours)"
@@ -255,22 +239,17 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              {/* Only show additional fields if in update mode */}
               {isUpdate && (
                 <>
                   <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
                     Timer & Status Info
                   </Typography>
-
-                  {/* Row for Status */}
                   <DropDownSelectField
                     label="Status"
                     required
                     options={statusOptions}
                     {...register("status")}
                   />
-
-                  {/* Row for Actual Start & End Date */}
                   <Box
                     sx={{
                       display: "flex",
@@ -297,8 +276,6 @@ export default function CreateTaskPage() {
                       {...register("actualEnd")}
                     />
                   </Box>
-
-                  {/* Row for Completed Hours & Timer Paused */}
                   <Box
                     sx={{
                       display: "flex",
@@ -328,7 +305,6 @@ export default function CreateTaskPage() {
                 </>
               )}
 
-              {/* Submit Button */}
               <Button
                 variant="contained"
                 type="submit"

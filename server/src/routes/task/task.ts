@@ -259,6 +259,11 @@ taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): P
 
     const tasks = await prisma.task.findMany({
       where: filter,
+      include: {
+        project: {
+          select: { projectName: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -276,6 +281,11 @@ taskRouter.get('/get-task/:id', verifyToken, async (req: Request, res: Response)
   try {
     const task = await prisma.task.findUnique({
       where: { id },
+      include: {
+        project: {
+          select: { projectName: true },
+        },
+      },
     });
 
     if (!task || task.userId !== userId) {
