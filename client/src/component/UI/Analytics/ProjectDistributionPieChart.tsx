@@ -1,8 +1,9 @@
 // components/ProjectDistributionPieChart.tsx
 "use client";
 
+import { Box, Paper, Typography } from "@mui/material";
 import React from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50"];
 
@@ -12,8 +13,19 @@ interface ProjectDistributionPieChartProps {
 
 export default function ProjectDistributionPieChart({ data }: ProjectDistributionPieChartProps) {
   return (
-    <div>
-      <h3>Project Distribution</h3>
+    <Paper 
+    sx={{ 
+      width: "100%", 
+      height: 400,   // Give a fixed or relative height for the chart area
+      p: 2          // Optional padding
+    }}
+    elevation={3}    // Optional shadow
+  >
+    
+     <Typography variant="h5" sx={{ mb: 2 }}>Project Distribution</Typography>
+
+     <Box sx={{ width: "100%", height: "80%" }}>
+     <ResponsiveContainer width="100%" height="100%">
       <PieChart width={400} height={300}>
         <Pie
           data={data}
@@ -31,6 +43,8 @@ export default function ProjectDistributionPieChart({ data }: ProjectDistributio
         <Tooltip />
         <Legend />
       </PieChart>
-    </div>
+      </ResponsiveContainer>
+      </Box>
+    </Paper>
   );
 }

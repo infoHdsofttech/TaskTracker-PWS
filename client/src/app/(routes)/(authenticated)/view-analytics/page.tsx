@@ -19,10 +19,15 @@ import TimeComparisonBarChart from "@/component/UI/Analytics//TimeComparisonBarC
 import ProjectTimeComparisonBarChart from "@/component/UI/Analytics/ProjectTimeComparisonBarChart";
 import CompletionTimelineLineChart from "@/component/UI/Analytics/CompletionTimelineLineChart";
 import { Box, Typography } from "@mui/material";
+import {useTheme} from "@mui/material/styles";
 
 import Grid from '@mui/material/Grid';
 
+
 export default function AnalyticsDashboard() {
+
+  const theme = useTheme();
+
   const [taskData, setTaskData] = useState([]);
   const [statusData, setStatusData] = useState([]);
   const [timeData, setTimeData] = useState([]);
@@ -99,7 +104,11 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <Box sx={{ padding: { xs: 2, md: 4 } }}>
+    <Box sx={{ padding: { xs: 2, md: 4 },
+    backgroundImage: theme.colors.backgroundGradientYellow,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    }}>
       <Typography variant="h2" sx={{ mb: 2 }}></Typography>
       <button onClick={exportToExcel} style={{ marginBottom: 20 }}>
       Download Excel
