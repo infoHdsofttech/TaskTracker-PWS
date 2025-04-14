@@ -57,19 +57,41 @@ projectRouter.delete('/delete-project/:id', verifyToken, async (req: Request, re
   const userId = (req as any).userId;
 
   try {
-    const project = await prisma.projectMaster.findUnique({ where: { id } });
+    // Check if the project exists and belongs to the user
+    const project = await prisma.projectMaster.findUnique({
+      where: { id },
+    });
+
     if (!project || project.userId !== userId) {
-    res.status(404).json({ message: "Project not found or unauthorized" });
-    return;
+      res.status(404).json({ message: "Project not found or unauthorized" });
+      return;
     }
 
-    await prisma.projectMaster.delete({ where: { id } });
+    // Check if any tasks reference this project
+    const taskCount = await prisma.task.count({
+      where: {
+        projectId: id,
+      },
+    });
+
+    if (taskCount > 0) {
+      res.status(409).json({
+        message: "Cannot delete project: Project exists in Task table",
+      });
+      return;
+    }
+
+    // Proceed with deletion if not referenced
+    await prisma.projectMaster.delete({
+      where: { id },
+    });
+
     res.status(200).json({ message: "Project deleted" });
   } catch (error) {
+    console.error("Error deleting project:", error);
     res.status(500).json({ message: "Error deleting project", error });
   }
 });
-
 // Fetch All Projects by User
 projectRouter.get('/fetch--all-projects', verifyToken, async (req: Request, res: Response) => {
   const userId = (req as any).userId;

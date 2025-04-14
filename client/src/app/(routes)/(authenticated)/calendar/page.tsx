@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import InputField from "@/component/UI/InputField/InputField";
 import { createProjectAction } from "@/actions/project";
 import { projectSchema } from "@/lib/zod/project";
+import ProjectCrud from "@/component/ProjectCRUD/ProjectCrud";
 
 
 
@@ -139,37 +140,7 @@ const CalendarPage: React.FC = () => {
         </Box>
       </Modal>
 
-      {/* Project creation form */}
-      <Paper elevation={3} sx={{ mt: 5, p: 3, maxWidth: 500 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Create New Project
-        </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <InputField
-            label="Project Name"
-            type="text"
-            {...register("projectName")}
-            errorMessage={errors.projectName?.message}
-          />
-
-          <InputField
-            label="Description"
-            type="text"
-            {...register("description")}
-            errorMessage={errors.description?.message}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Create Project
-          </Button>
-        </form>
-      </Paper>
+      <ProjectCrud />
     </Box>
   );
 };

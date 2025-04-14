@@ -5,3 +5,4 @@ export const projectSchema = z.object({
     description: z.string().optional()
   });
   
+export type ProjectFormData = z.infer<typeof projectSchema>;

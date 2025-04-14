@@ -42,10 +42,18 @@ export interface CreateProjectData {
       toast.success("Project deleted!");
       return response.data;
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Error deleting project");
+      const message = error?.response?.data?.message;
+  
+      if (message === "Cannot delete project: Project exists in Task table") {
+        toast.error("Cannot delete: Project is used in tasks.");
+      } else {
+        toast.error(message || "Error deleting project");
+      }
+  
       throw error;
     }
   };
+  
 
   export const getAllProjectsByUserAction = async () => {
     try {

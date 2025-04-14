@@ -39,7 +39,9 @@ authRouter.post('/login', async (req: Request, res: Response):Promise <any> => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
 
-        const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
+        const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, 
+            // { expiresIn: "1h" }
+        );
 
         res.json({ message: "Login successful", token,status: 200 });
     } catch (error) {
