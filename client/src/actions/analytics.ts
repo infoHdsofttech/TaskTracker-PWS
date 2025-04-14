@@ -26,10 +26,21 @@ export const fetchStatusDistribution = async () => {
     }
   };
   
+  export const fetchProjectDistribution = async () => {
+    try {
+      const response = await api.get("/analytics/project-distribution");
+      console.log("fetchProjectDistribution response:", response.data.data);
+      return response.data.data;
+    } catch (error: any) {
+      console.error("Error fetching project distribution:", error);
+      throw new Error(error.response?.data?.message || "Failed to fetch project distribution");
+    }
+  };
+
   // Fetch estimated vs completed data for bar chart
   export const fetchTimeComparison = async () => {
     try {
-      const response = await api.get("/analytics/time-comparison");
+      const response = await api.get("/analytics/task-time-comparison");
       return response.data.data;
     } catch (error: any) {
       console.error("Error fetching time comparison:", error);

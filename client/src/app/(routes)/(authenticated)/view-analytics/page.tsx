@@ -22,6 +22,7 @@ import {
   fetchStatusDistribution,
   fetchTimeComparison,
   fetchTimelineData,
+  fetchProjectDistribution,
 } from "@/actions/analytics";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50"];
@@ -31,22 +32,25 @@ export default function AnalyticsDashboard() {
   const [statusData, setStatusData] = useState([]);
   const [timeData, setTimeData] = useState([]);
   const [timelineData, setTimelineData] = useState([]);
+  const [projectDistData, setProjectDistData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [summary, status, time, timeline] = await Promise.all([
+        const [summary, status, time, timeline,projectDist] = await Promise.all([
           fetchTaskSummary(),
           fetchStatusDistribution(),
           fetchTimeComparison(),
           fetchTimelineData(),
+          fetchProjectDistribution(),
         ]);
 
         console.log("Summary response:", summary);
         console.log("Status response:", status);
         console.log("Time response:", time);
         console.log("Timeline response:", timeline);
+        console.log("Project Distribution response:", projectDist);
 
         // If summary is an array of tasks directly:
         setTaskData(Array.isArray(summary) ? summary : summary?.tasks ?? []);
@@ -71,6 +75,13 @@ export default function AnalyticsDashboard() {
           ? timeline[0]
           : timeline;
         setTimelineData(safeTimelineData ?? []);
+
+        // Same for projectDist
+        setProjectDistData(
+          Array.isArray(projectDist) && Array.isArray(projectDist[0])
+            ? projectDist[0]
+            : projectDist ?? []
+        );
       } catch (err) {
         console.error("Error loading dashboard analytics", err);
       } finally {
@@ -123,6 +134,33 @@ export default function AnalyticsDashboard() {
         <Legend />
       </PieChart>
 
+{/* PIE CHART: Project Distribution */}
+<h3>Project Distribution</h3>
+      <PieChart width={400} height={300}>
+      <Pie
+  data={projectDistData}
+  dataKey="completedTime"     // match your existing field
+  nameKey="projectName"       // match your existing field
+  cx="50%"
+  cy="50%"
+  outerRadius={100}
+  label
+>
+  {projectDistData.map((entry, index) => (
+    <Cell
+      key={`cell-project-${index}`}
+      fill={COLORS[index % COLORS.length]}
+    />
+  ))}
+</Pie>
+
+        <Tooltip />
+        <Legend />
+      </PieChart>
+
+      
+
+
       {/* B A R  C H A R T */}
       <h3>Estimated vs Completed Time</h3>
       <BarChart width={600} height={300} data={timeData}>
@@ -131,8 +169,30 @@ export default function AnalyticsDashboard() {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="Completed" fill="#82ca9d" />
         <Bar dataKey="Estimated" fill="#8884d8" />
+        <Bar dataKey="Completed" fill="#82ca9d" />
+       
+      </BarChart>
+
+ {/* BAR CHART: Estimated vs Completed Time on a Project Basis */}
+ <h3>Project Time Comparison</h3>
+      <BarChart width={600} height={300} data={projectDistData}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="projectName" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Bar
+          dataKey="estimatedTime"
+          fill="#8884d8"
+          name="Estimated Time"
+        />
+        <Bar
+          dataKey="completedTime"
+          fill="#82ca9d"
+          name="Completed Time"
+        />
+       
       </BarChart>
 
       {/* L I N E  C H A R T */}
