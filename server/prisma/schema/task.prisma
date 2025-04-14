@@ -15,7 +15,7 @@ model Task {
   id             String       @id @default(uuid())
   title          String
   description    String?
-  group          String?      // Optional grouping field (e.g., "Work", "Personal")
+  // group          String?      // Optional grouping field (e.g., "Work", "Personal")
   
   // Planned dates: when the task is scheduled to start & end
   plannedStart   DateTime     // Scheduled start date of the task
@@ -28,6 +28,9 @@ model Task {
   status         TaskStatus   @default(PENDING)  // Options: PENDING, IN_PROGRESS, COMPLETED, DEFERRED
   priority       TaskPriority @default(MEDIUM)   // Options: LOW, MEDIUM, HIGH
   
+  project        ProjectMaster @relation(fields: [projectId], references: [id])
+  projectId      String
+
   // Timer-related fields
   timerStarted   DateTime?    // When the task timer was started
   timerEnded     DateTime?    // When the task timer was stopped

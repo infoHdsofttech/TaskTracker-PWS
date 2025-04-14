@@ -2,13 +2,19 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { api } from './api'; // Your preconfigured axios instance
 
-interface AuthData {
+interface SignupAuthData {
+  name: string | null;
+  email: string;
+  password: string;
+}
+
+interface LogininAuthData {
   email: string;
   password: string;
 }
 
 // Signup action for the task tracker
-export const signupAction = async (data: AuthData) => {
+export const signupAction = async (data: SignupAuthData) => {
   try {
     // Call the signup endpoint (adjust the URL as needed)
     const response = await api.post('/auth/signup', data, {
@@ -29,7 +35,7 @@ export const signupAction = async (data: AuthData) => {
 };
 
 // Login action for the task tracker
-export const loginAction = async (data: AuthData) => {
+export const loginAction = async (data: LogininAuthData) => {
   try {
     // Call the login endpoint (adjust the URL as needed)
     const response = await api.post('/auth/login', data, {

@@ -1,17 +1,28 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Box, Modal, Typography,useTheme } from "@mui/material";
+import { Box, Modal, Typography, useTheme, Paper, Button } from "@mui/material";
 import TaskCalendar, { Task } from "@/component/UI/TaskCalendar/TaskCalendar";
 import { fetchTasksByMonth } from "@/actions/task";
 import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import InputField from "@/component/UI/InputField/InputField";
+import { createProjectAction } from "@/actions/project";
+import { projectSchema } from "@/lib/zod/project";
+
+
+
+type ProjectFormData = z.infer<typeof projectSchema>;
 
 const CalendarPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedDayTasks, setSelectedDayTasks] = useState<Task[]>([]);
-const theme = useTheme();
+  const theme = useTheme();
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -19,35 +30,27 @@ const theme = useTheme();
     setSelectedDayTasks([]);
   };
 
-  // Fetch tasks for a given month string ("YYYY-MM")
   const fetchTasksForMonth = async (month: string) => {
     try {
       const data = await fetchTasksByMonth(month);
-      console.log(`Fetched tasks for month ${month}:`, data);
       setTasks(data?.tasks || []);
     } catch (error) {
       console.error("Error fetching tasks for month", month, error);
     }
   };
 
-  // Initial fetch for the current month
   useEffect(() => {
-    const currentMonth = format(new Date(), "yyyy-MM"); // e.g., "2025-04"
+    const currentMonth = format(new Date(), "yyyy-MM");
     fetchTasksForMonth(currentMonth);
   }, []);
 
-  // When the calendar navigates (next, prev, today), this callback is triggered.
   const handleCalendarNavigate = (date: Date, view: string, action: string) => {
-    // For month view, the navigated date represents the first day of the new month.
-    // Format that date as "YYYY-MM" to fetch tasks for that month.
     const month = format(date, "yyyy-MM");
     fetchTasksForMonth(month);
   };
 
-  // When a date is clicked in the calendar, filter tasks for that day.
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
-    // Format the clicked date as "YYYY-MM-dd"
     const clickedDayKey = format(date, "yyyy-MM-dd");
     const tasksForDay = tasks.filter(task => {
       if (!task.plannedStart) return false;
@@ -57,24 +60,43 @@ const theme = useTheme();
     handleOpen();
   };
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<ProjectFormData>({
+    resolver: zodResolver(projectSchema)
+  });
+
+  const onSubmit = async (data: ProjectFormData) => {
+    try {
+      await createProjectAction(data);
+      reset();
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
+  };
+
   return (
-    <Box sx={{ p: 3,
-      backgroundImage: theme.colors.backgroundGradientYellow,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-     }}>
+    <Box
+      sx={{
+        p: 3,
+        backgroundImage: theme.colors.backgroundGradientYellow,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Calendar
       </Typography>
 
-      {/* Pass the onNavigate callback to update tasks when navigating */}
       <TaskCalendar
         tasks={tasks}
         onDateClick={handleDateClick}
         onNavigate={handleCalendarNavigate}
       />
 
-      {/* Modal to display tasks for the selected day */}
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -116,13 +138,40 @@ const theme = useTheme();
           )}
         </Box>
       </Modal>
+
+      {/* Project creation form */}
+      <Paper elevation={3} sx={{ mt: 5, p: 3, maxWidth: 500 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Create New Project
+        </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <InputField
+            label="Project Name"
+            type="text"
+            {...register("projectName")}
+            errorMessage={errors.projectName?.message}
+          />
+
+          <InputField
+            label="Description"
+            type="text"
+            {...register("description")}
+            errorMessage={errors.description?.message}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Create Project
+          </Button>
+        </form>
+      </Paper>
     </Box>
   );
 };
 
 export default CalendarPage;
-
-
-
-
-

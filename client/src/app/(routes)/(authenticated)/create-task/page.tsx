@@ -2,23 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-  useTheme,
-} from "@mui/material";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Typography, Button, useTheme } from "@mui/material";
 
 // Action functions for task creation and update.
 import {
   createTaskAction,
   updateTaskAction,
-  fetchTaskByIdAction,
-  CreateTaskData,
+  fetchTaskByIdAction
 } from "@/actions/task";
+
+// Import the project action to fetch all projects.
+import { getAllProjectsByUserAction } from "@/actions/project";
+
+// Import the Zod schema and its inferred type.
+import { createTaskSchema,CreateTaskInput} from "@/lib/zod/task";
 
 // Custom UI components
 import InputField from "@/component/UI/InputField/InputField";
@@ -35,13 +33,36 @@ export default function CreateTaskPage() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CreateTaskData>({
+  } = useForm<CreateTaskInput>({
+    resolver: zodResolver(createTaskSchema),
     defaultValues: {
       priority: "MEDIUM",
     },
   });
 
   const theme = useTheme();
+
+  // State for project options for the dropdown.
+  const [projectOptions, setProjectOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  // Fetch projects on component mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getAllProjectsByUserAction();
+        // Assuming response contains a "projects" array.
+        const options = response.projects.map((project: any) => ({
+          value: project.id,
+          label: project.projectName,
+        }));
+        setProjectOptions(options);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    })();
+  }, []);
 
   // Options for priority and status dropdown fields.
   const priorityOptions = [
@@ -64,12 +85,12 @@ export default function CreateTaskPage() {
     if (isUpdate) {
       (async () => {
         try {
-          const response = await fetchTaskByIdAction(taskId);
+          const response = await fetchTaskByIdAction("hardcoded-task-id");
           // Assuming the API returns data as { task: { ...taskData } }
           const taskData = response.task;
           // Reset the form with fetched task data.
           reset({
-            group: taskData.group,
+            projectId: taskData.projectId, // Updated from "group" to "projectId"
             title: taskData.title,
             description: taskData.description,
             startDate: taskData.plannedStart
@@ -90,7 +111,6 @@ export default function CreateTaskPage() {
             isPaused: taskData.isPaused,
             completedHours: taskData.completedHours?.toString(),
           });
-          // Also update our local state if needed
           setPriority(taskData.priority);
         } catch (error) {
           console.error("Error fetching task data:", error);
@@ -100,10 +120,10 @@ export default function CreateTaskPage() {
   }, [isUpdate, reset]);
 
   // onSubmit: If update mode, call updateTaskAction with the hardcoded id.
-  const onSubmit: SubmitHandler<CreateTaskData> = async (data) => {
+  const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
     try {
       if (isUpdate) {
-        await updateTaskAction(taskId, data);
+        await updateTaskAction("hardcoded-task-id", data);
       } else {
         await createTaskAction(data);
       }
@@ -132,12 +152,12 @@ export default function CreateTaskPage() {
           }}
         >
           <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-            {isUpdate ? "Edit Project" : "Add Project"}
+            {isUpdate ? "Edit Task" : "Add Task"}
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {/* Row for Task Group & Project Name */}
+              {/* Row for Task Name & Project selection */}
               <Box
                 sx={{
                   display: "flex",
@@ -151,23 +171,22 @@ export default function CreateTaskPage() {
                   },
                 }}
               >
-
-                  <InputField
+                <InputField
                   label="Task Name"
                   type="text"
                   required
                   errorMessage={errors.title?.message}
-                  {...register("title", { required: "Task name is required" })}
+                  {...register("title")}
                 />
 
-                <InputField
-                  label="Project Group"
-                  type="text"
+                {/* Use a dropdown to select a project with the field "projectId" */}
+                <DropDownSelectField
+                  label="Project"
                   required
-                  errorMessage={errors.group?.message}
-                  {...register("group", { required: "Project group is required" })}
+                  errorMessage={errors.projectId?.message}
+                  options={projectOptions}
+                  {...register("projectId")}
                 />
-              
               </Box>
 
               {/* Row for Description & Priority */}
@@ -309,8 +328,6 @@ export default function CreateTaskPage() {
                 </>
               )}
 
-  
-
               {/* Submit Button */}
               <Button
                 variant="contained"
@@ -318,7 +335,7 @@ export default function CreateTaskPage() {
                 fullWidth
                 sx={{ mt: 2, py: 1.5 }}
               >
-                {isUpdate ? "Update Project" : "Add Project"}
+                {isUpdate ? "Update Task" : "Add Task"}
               </Button>
             </Box>
           </form>

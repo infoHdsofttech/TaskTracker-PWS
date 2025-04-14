@@ -8,7 +8,7 @@ const SECRET_KEY = "supersecretkey"; // Replace with env variable
 
 
 authRouter.post('/signup', async (req: Request, res: Response): Promise<any>=> {
-    const { email, password } = req.body;
+    const { name,email, password } = req.body;
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -17,6 +17,7 @@ authRouter.post('/signup', async (req: Request, res: Response): Promise<any>=> {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await prisma.user.create({
             data: {
+                name,
                 email,
                 password: hashedPassword,
             }

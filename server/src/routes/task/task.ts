@@ -3,12 +3,12 @@ import prisma from '../../lib/prisma';
 import verifyToken from '../../middlewares/Authenticate';
 
 const taskRouter = Router();
-const TestTime = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours ago
+const TestTime = new Date(Date.now() - 2 * 60 * 60 * 1000); // 2 hours ago
 
 // Create Task Endpoint: Now includes estimatedTime and uses plannedStart/End.
 taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response) => {
-  // Destructure extra field "estimatedTime" from the request body.
-  const { title, description, group, startDate, endDate, priority, estimatedTime } = req.body;
+  // Destructure extra field "estimatedTime" and use projectId from the request body.
+  const { title, description, projectId, startDate, endDate, priority, estimatedTime } = req.body;
   const userId = (req as any).userId; // userId provided by verifyToken middleware
 
   try {
@@ -16,7 +16,6 @@ taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response)
       data: {
         title,
         description,
-        group,
         // Use plannedStart and plannedEnd fields
         plannedStart: startDate ? new Date(startDate) : new Date(),
         plannedEnd: endDate ? new Date(endDate) : null,
@@ -24,7 +23,10 @@ taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response)
         priority: priority || "MEDIUM",
         // Convert estimatedTime to integer if provided, else leave undefined
         estimatedTime: estimatedTime !== undefined ? parseInt(estimatedTime, 10) : undefined,
-        userId, // Associates the task with the authenticated user
+        // Set the project relation via projectId
+        projectId,
+        // Set the authenticated user
+        userId,
       },
     });
     res.status(201).json({ message: "Task created", task: newTask });
@@ -33,15 +35,16 @@ taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response)
   }
 });
 
-// Update Task Endpoint: Now accepts updates for status, timer fields, estimated time,
+// Update Task Endpoint: Accepts updates including status, timer fields,
 // plus new fields: actualStart, actualEnd, isPaused, and completedHours.
 taskRouter.put('/update-task/:id', verifyToken, async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = (req as any).userId;
+  // Notice we no longer destructure "group"; we now expect "projectId"
   const { 
     title, 
     description, 
-    group, 
+    projectId, 
     startDate,  // This will update plannedStart
     endDate,    // This will update plannedEnd
     priority, 
@@ -68,7 +71,8 @@ taskRouter.put('/update-task/:id', verifyToken, async (req: Request, res: Respon
       data: {
         title,
         description,
-        group,
+        // Update project relation if provided
+        projectId: projectId ? projectId : existingTask.projectId,
         // Update planned dates if provided
         plannedStart: startDate ? new Date(startDate) : undefined,
         plannedEnd: endDate ? new Date(endDate) : undefined,
@@ -78,12 +82,12 @@ taskRouter.put('/update-task/:id', verifyToken, async (req: Request, res: Respon
         timerEnded: timerEnded ? new Date(timerEnded) : undefined,
         estimatedTime: estimatedTime !== undefined ? parseInt(estimatedTime, 10) : undefined,
         // New actual start and end fields
-        // actualStart: actualStart ? new Date(actualStart) : undefined,
+        actualStart: actualStart ? new Date(actualStart) : undefined,
         actualEnd: actualEnd ? new Date(actualEnd) : undefined,
         // Update pause flag if provided and valid boolean
         isPaused: typeof isPaused === 'boolean' ? isPaused : undefined,
-        // Update completedHours as integer if provided
-        // completedHours: completedHours !== undefined ? parseInt(completedHours, 10) : undefined,
+        // Update completedHours as a float if provided
+        completedHours: completedHours !== undefined ? parseFloat(completedHours) : undefined,
       },
     });
     res.status(200).json({ message: "Task updated", task: updatedTask });
@@ -115,7 +119,6 @@ taskRouter.delete('/delete-task/:id', verifyToken, async (req: Request, res: Res
 });
 
 // Start Task Timer Endpoint: Sets timerStarted to current time and updates status to IN_PROGRESS.
-// Start Task Timer Endpoint
 taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const userId = (req as any).userId;
@@ -145,8 +148,6 @@ taskRouter.post('/start-task-timer/:id', verifyToken, async (req: Request, res: 
   }
 });
 
-
-// Stop Task Timer Endpoint: Sets timerEnded to current time.
 // Stop Task Timer Endpoint: Sets timerEnded, marks as paused, and calculates completedHours.
 taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
@@ -172,15 +173,14 @@ taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: R
     // Get previously completed hours; if not set, assume 0.
     const previousCompleted = task.completedHours ? Number(task.completedHours) : 0;
     // Add the current interval to get the new total.
-    // If you're using integer hours, you might round or floor the value.
     const newCompletedHours = previousCompleted + intervalHours;
     
     const updatedTask = await prisma.task.update({
       where: { id },
       data: {
-      timerEnded: now,
-      isPaused: true, // Task is paused after stopping the timer.
-      completedHours: parseFloat(newCompletedHours.toFixed(2)),
+        timerEnded: now,
+        isPaused: true, // Task is paused after stopping the timer.
+        completedHours: parseFloat(newCompletedHours.toFixed(2)),
       },
     });
     
@@ -190,11 +190,10 @@ taskRouter.post('/stop-task-timer/:id', verifyToken, async (req: Request, res: R
   }
 });
 
-
 // Defer Task Endpoint: Marks the task as DEFERRED and optionally updates the planned start date.
 taskRouter.post('/defer-task/:id', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { newStartDate } = req.body; // Optionally, the client can pass a new start date
+  const { newStartDate } = req.body; // Client can optionally pass a new start date
   const userId = (req as any).userId;
 
   try {
@@ -217,35 +216,7 @@ taskRouter.post('/defer-task/:id', verifyToken, async (req: Request, res: Respon
   }
 });
 
-// // GET Tasks Endpoint: Fetch tasks by status (supports "ALL" to fetch all tasks).
-// taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): Promise<void> => {
-//   const { status } = req.query; // expected values: "TODO", "IN_PROGRESS", "DONE", or "ALL"
-//   const userId = (req as any).userId;
-
-//   if (typeof status !== 'string') {
-//     res.status(400).json({ message: "Status parameter is required" });
-//     return;
-//   }
-
-//   try {
-//     const filter: any = { userId };
-
-//     if (status.toUpperCase() !== "ALL") {
-//       filter.status = status;
-//     }
-
-//     const tasks = await prisma.task.findMany({
-//       where: filter,
-//       orderBy: { createdAt: 'desc' },
-//     });
-
-//     res.status(200).json({ message: "Tasks fetched successfully", tasks });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error fetching tasks", error });
-//   }
-// });
-
-
+// GET Tasks Endpoint: Fetch tasks by status (supports "ALL" to fetch all tasks) or by month.
 taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): Promise<void> => {
   const { status, month } = req.query; // Expected: status like "TODO", "ALL" or month in "YYYY-MM" format.
   const userId = (req as any).userId;
@@ -271,7 +242,7 @@ taskRouter.get('/get-tasks', verifyToken, async (req: Request, res: Response): P
       }
 
       // Create a date range for the month.
-      // For example, for "2025-04" startDate is April 1, 2025 and endDate is April 30, 2025 23:59:59.999
+      // For example, for "2025-04": startDate is April 1, 2025 and endDate is April 30, 2025 23:59:59.999
       const startDate = new Date(yearNum, monthNum - 1, 1);
       const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
 

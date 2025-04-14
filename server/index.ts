@@ -3,6 +3,7 @@ import cors from 'cors';
 import prisma from './src/lib/prisma'; // Ensure this exports PrismaClient
 import authRouter from './src/routes/auth/auth';
 import taskRouter from './src/routes/task/task';
+import projectRouter from './src/routes/project/project';
 
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/auth', authRouter);
 app.use('/api/task', taskRouter);
+app.use('/api/project', projectRouter);
 
 // Start the server
 app.listen(9000, () => {
