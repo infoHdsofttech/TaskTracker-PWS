@@ -4,6 +4,8 @@
 import React, { createContext, useState, ReactNode } from "react";
 
 export interface TaskContextType {
+  viewingTask: boolean;
+  setViewingTask: (val: boolean) => void;
   editingTask: boolean;
   setEditingTask: (value: boolean) => void;
   taskActionType: string;
@@ -20,6 +22,7 @@ export const TaskContext = createContext<TaskContextType | null>(null);
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
 
+  const [viewingTask, setViewingTask] = useState(false);
   const [editingTask, setEditingTask] = useState<boolean>(false);
   
   const [taskActionType, setTaskActionType] = useState<string>("Create A New Task");
@@ -30,6 +33,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   return (
     <TaskContext.Provider
       value={{
+        viewingTask,
+        setViewingTask,
         editingTask,
         setEditingTask,
         taskActionType,

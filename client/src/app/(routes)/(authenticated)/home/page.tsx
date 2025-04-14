@@ -20,9 +20,10 @@ export default function Home() {
   const router = useRouter();
   const { user, loading } = useUser();
 
-  const { setEditingTask, setTaskActionType, setTaskId, setTaskName, setTaskData } = useContext(TaskContext)!;
+  const { setViewingTask,setEditingTask, setTaskActionType, setTaskId, setTaskName, setTaskData } = useContext(TaskContext)!;
   
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [activeFilter, setActiveFilter] = useState<"ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED">("IN_PROGRESS");
 
   const filters: { label: string; value: "ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED" }[] = [
@@ -41,6 +42,29 @@ export default function Home() {
       console.error("Error fetching tasks:", error);
     }
   };
+
+  // Fetch all tasks once for percentage calculation
+const fetchAllTasks = async () => {
+  try {
+    const { tasks: allFetchedTasks } = await fetchTasksByStatus("ALL");
+    setAllTasks(allFetchedTasks);
+  } catch (error) {
+    console.error("Error fetching all tasks:", error);
+  }
+};
+
+// Re-fetch on mount and after filtered tasks fetch
+useEffect(() => {
+  fetchAllTasks();
+}, []);
+
+const calculateCompletionPercentage = () => {
+  const total = allTasks.length;
+  const completed = allTasks.filter((task) => task.status === "COMPLETED").length;
+  return total === 0 ? 0 : Math.round((completed / total) * 100);
+};
+
+const taskCompletionPercentage = calculateCompletionPercentage();
 
   useEffect(() => {
     fetchTasks();
@@ -80,6 +104,7 @@ export default function Home() {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
+    setViewingTask(false); // Ensure view mode is off
     setEditingTask(true);
     setTaskActionType("Edit Task");
     setTaskId(task.id);
@@ -100,10 +125,17 @@ export default function Home() {
   };
 
   const handleView = (id: string) => {
-    console.log("View task", id);
-    // Navigate or open modal
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+  
+    setEditingTask(false); // Ensure edit mode is off
+    setViewingTask(true);  // Enable view mode
+    setTaskActionType("View Task");
+    setTaskId(task.id);
+    setTaskName(task.title);
+    setTaskData(task);
+    router.push("/create-task"); // Reuse same route
   };
-
   return (
     <Box
       sx={{
@@ -139,9 +171,9 @@ export default function Home() {
             Your today's task almost done!
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              85%
-            </Typography>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+  {taskCompletionPercentage}%
+</Typography>
             <Button
               variant="contained"
               sx={{

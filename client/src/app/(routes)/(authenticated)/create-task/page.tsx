@@ -33,12 +33,13 @@ import { TaskContext } from "@/component/context/TaskContext";
 import InputField from "@/component/UI/InputField/InputField";
 import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
 import DateInputField from "@/component/UI/DateInputField/DateInputField";
+import { Task } from "@mui/icons-material";
 
 export default function CreateTaskPage() {
   const theme = useTheme();
   const router = useRouter();
   // Values from context
-  const { editingTask, taskData, setEditingTask } = useContext(TaskContext)!;
+  const { editingTask, taskData, setEditingTask,viewingTask } = useContext(TaskContext)!;
 
   // React Hook Form
   const {
@@ -82,7 +83,7 @@ export default function CreateTaskPage() {
   useEffect(() => {
     if (projectOptions.length > 0) {
       // If in editing mode and we have data
-      if (editingTask && taskData) {
+      if ((editingTask || viewingTask) && taskData) {
         reset({
           projectId: taskData.projectId,
           title: taskData.title,
@@ -109,7 +110,7 @@ export default function CreateTaskPage() {
       // We’ve either set edit data or we’re in create mode
       setIsLoading(false);
     }
-  }, [editingTask, taskData, projectOptions, reset]);
+  }, [viewingTask,editingTask, taskData, projectOptions, reset]);
 
   // Submit (create or update)
   const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
@@ -128,6 +129,7 @@ export default function CreateTaskPage() {
       console.error("Error submitting task:", error);
     }
   };
+
 
   // If we’re still loading (fetching projects or setting default values), show loader
   if (isLoading) {
@@ -160,9 +162,9 @@ export default function CreateTaskPage() {
     >
       <Box sx={{ p: 2 }}>
         <Box sx={{ p: 3, borderRadius: 2, margin: "0 auto" }}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-            {editingTask ? "Edit Task" : "Create Task"}
-          </Typography>
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+  {viewingTask ? "Task Details" : editingTask ? "Edit Task" : "Create Task"}
+</Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -178,6 +180,7 @@ export default function CreateTaskPage() {
                   label="Task Name"
                   type="text"
                   required
+                  readOnly={viewingTask} // Make it read-only if viewing task
                   errorMessage={errors.title?.message}
                   {...register("title")}
                 />
@@ -207,6 +210,7 @@ export default function CreateTaskPage() {
                 <InputField
                   label="Description"
                   type="text"
+                  readOnly={viewingTask} // Make it read-only if viewing task
                   errorMessage={errors.description?.message}
                   {...register("description")}
                 />
@@ -262,11 +266,12 @@ export default function CreateTaskPage() {
                   type="number"
                   errorMessage={errors.estimatedTime?.message}
                   {...register("estimatedTime")}
+                  readOnly={viewingTask} // Make it read-only if viewing task
                 />
               </Box>
 
-              {/* Additional fields if editing */}
-              {editingTask && (
+              {/* Additional fields if editing or just for view*/}
+              {(editingTask || viewingTask) && (
                 <>
                   <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
                     Timer & Status Info
@@ -284,6 +289,8 @@ export default function CreateTaskPage() {
                           { value: "COMPLETED", label: "Completed" },
                           { value: "DEFERRED", label: "Deferred" },
                         ]}
+                        readOnly={viewingTask} // Make it read-only if viewing task
+                        errorMessage={errors.status?.message}
                         {...field}
                       />
                     )}
@@ -295,18 +302,24 @@ export default function CreateTaskPage() {
                       flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                     }}
                   >
-                    {/* <InputField
+                    {!viewingTask && taskData.status === "COMPLETED" && (
+                      <> 
+                    <InputField
                       label="Actual Start Date"
                       type="date"
+                      readOnly={viewingTask} // Make it read-only if viewing task
                       errorMessage={errors.actualStart?.message}
                       {...register("actualStart")}
                     />
                     <InputField
                       label="Actual End Date"
                       type="date"
+                      readOnly={viewingTask} // Make it read-only if viewing task
                       errorMessage={errors.actualEnd?.message}
                       {...register("actualEnd")}
-                    /> */}
+                    />
+                    </>
+                    )}
                   </Box>
                   <Box
                     sx={{
@@ -319,6 +332,7 @@ export default function CreateTaskPage() {
                            <InputField
                            label="Completed Hours"
                            type="number"
+                           readOnly={viewingTask} // Make it read-only if viewing task
                            errorMessage={errors.completedHours?.message}
                            {...register("completedHours")}
                          />
@@ -333,10 +347,11 @@ export default function CreateTaskPage() {
                   </Box>
                 </>
               )}
-
+{!viewingTask && (
               <Button variant="contained" type="submit" fullWidth sx={{ mt: 2, py: 1.5 }}>
                 {editingTask ? "Update Task" : "Create Task"}
               </Button>
+)}
             </Box>
           </form>
         </Box>
