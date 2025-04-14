@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography, Button, useTheme } from "@mui/material";
@@ -18,15 +18,20 @@ import { getAllProjectsByUserAction } from "@/actions/project";
 // Import the Zod schema and its inferred type.
 import { createTaskSchema, CreateTaskInput } from "@/lib/zod/task";
 
+// Import your context and its type.
+
+import { TaskContext } from "@/component/context/TaskContext";
+
 // Custom UI components
 import InputField from "@/component/UI/InputField/InputField";
 import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
 
-// Constant to simulate page mode. Set to true for update mode.
-const isUpdate = false;
-// const taskId = "hardcoded-task-id"; // For update mode
-
 export default function CreateTaskPage() {
+  const theme = useTheme();
+
+  // Get values from context. The "!" asserts that context is defined
+  const { editingTask, taskData, setEditingTask } = useContext(TaskContext)!;
+
   const {
     register,
     handleSubmit,
@@ -39,14 +44,12 @@ export default function CreateTaskPage() {
     },
   });
 
-  const theme = useTheme();
-
-  // State for project options for the dropdown.
+  // State for project options dropdown.
   const [projectOptions, setProjectOptions] = useState<
     { value: string; label: string }[]
   >([]);
 
-  // Fetch projects on component mount.
+  // Fetch project options on mount.
   useEffect(() => {
     (async () => {
       try {
@@ -62,64 +65,41 @@ export default function CreateTaskPage() {
     })();
   }, []);
 
-  // Options for priority and status dropdown fields.
-  const priorityOptions = [
-    { value: "LOW", label: "Low" },
-    { value: "MEDIUM", label: "Medium" },
-    { value: "HIGH", label: "High" },
-  ];
-
-  const statusOptions = [
-    { value: "PENDING", label: "Pending" },
-    { value: "IN_PROGRESS", label: "In Progress" },
-    { value: "COMPLETED", label: "Completed" },
-    { value: "DEFERRED", label: "Deferred" },
-  ];
-
-  const [priority, setPriority] = useState("MEDIUM");
-
-  // In update mode, fetch the task data and prefill the form.
+  // If editing mode is on and taskData exists, prefill the form.
   useEffect(() => {
-    if (isUpdate) {
-      (async () => {
-        try {
-          const response = await fetchTaskByIdAction("hardcoded-task-id");
-          const taskData = response.task;
-          reset({
-            projectId: taskData.projectId,
-            title: taskData.title,
-            description: taskData.description,
-            startDate: taskData.plannedStart
-              ? new Date(taskData.plannedStart).toISOString().split("T")[0]
-              : "",
-            endDate: taskData.plannedEnd
-              ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
-              : "",
-            priority: taskData.priority,
-            estimatedTime: taskData.estimatedTime,
-            status: taskData.status,
-            actualStart: taskData.actualStart
-              ? new Date(taskData.actualStart).toISOString().split("T")[0]
-              : "",
-            actualEnd: taskData.actualEnd
-              ? new Date(taskData.actualEnd).toISOString().split("T")[0]
-              : "",
-            isPaused: taskData.isPaused,
-            completedHours: taskData.completedHours,
-          });
-          setPriority(taskData.priority);
-        } catch (error) {
-          console.error("Error fetching task data:", error);
-        }
-      })();
+    if (editingTask && taskData) {
+      reset({
+        projectId: taskData.projectId,
+        title: taskData.title,
+        description: taskData.description,
+        startDate: taskData.plannedStart
+          ? new Date(taskData.plannedStart).toISOString().split("T")[0]
+          : "",
+        endDate: taskData.plannedEnd
+          ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
+          : "",
+        priority: taskData.priority,
+        estimatedTime: taskData.estimatedTime,
+        status: taskData.status,
+        actualStart: taskData.actualStart
+          ? new Date(taskData.actualStart).toISOString().split("T")[0]
+          : "",
+        actualEnd: taskData.actualEnd
+          ? new Date(taskData.actualEnd).toISOString().split("T")[0]
+          : "",
+        isPaused: taskData.isPaused,
+        completedHours: taskData.completedHours,
+      });
     }
-  }, [isUpdate, reset]);
+  }, [editingTask, taskData, reset]);
 
-  // onSubmit handler.
+  // onSubmit handler calls update if editing, or create if not.
   const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
     try {
-      if (isUpdate) {
-        await updateTaskAction("hardcoded-task-id", data);
+      if (editingTask && taskData) {
+        await updateTaskAction(taskData.id, data);
+        // Clear editing state after successful update.
+        setEditingTask(false);
       } else {
         await createTaskAction(data);
       }
@@ -142,7 +122,7 @@ export default function CreateTaskPage() {
       <Box sx={{ p: 2 }}>
         <Box sx={{ p: 3, borderRadius: 2, margin: "0 auto" }}>
           <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-            {isUpdate ? "Edit Task" : "Add Task"}
+            {editingTask ? "Edit Task" : "Create Task"}
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -198,9 +178,13 @@ export default function CreateTaskPage() {
                 <DropDownSelectField
                   label="Priority"
                   required
-                  options={priorityOptions}
+                  options={[
+                    { value: "LOW", label: "Low" },
+                    { value: "MEDIUM", label: "Medium" },
+                    { value: "HIGH", label: "High" },
+                  ]}
                   {...register("priority", {
-                    onChange: (e) => setPriority(e.target.value)
+                    onChange: (e) => {} // You can update local state if needed
                   })}
                 />
               </Box>
@@ -230,7 +214,13 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              <Box sx={{ display: "flex", gap: "5%", flexDirection: "column" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "5%",
+                  flexDirection: "column",
+                }}
+              >
                 <InputField
                   label="Estimated Time (hours)"
                   type="number"
@@ -239,7 +229,8 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              {isUpdate && (
+              {/* Add additional fields if needed (e.g., for edit mode) */}
+              {editingTask && (
                 <>
                   <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
                     Timer & Status Info
@@ -247,7 +238,12 @@ export default function CreateTaskPage() {
                   <DropDownSelectField
                     label="Status"
                     required
-                    options={statusOptions}
+                    options={[
+                      { value: "PENDING", label: "Pending" },
+                      { value: "IN_PROGRESS", label: "In Progress" },
+                      { value: "COMPLETED", label: "Completed" },
+                      { value: "DEFERRED", label: "Deferred" },
+                    ]}
                     {...register("status")}
                   />
                   <Box
@@ -311,7 +307,7 @@ export default function CreateTaskPage() {
                 fullWidth
                 sx={{ mt: 2, py: 1.5 }}
               >
-                {isUpdate ? "Update Task" : "Add Task"}
+                {editingTask ? "Update Task" : "Create Task"}
               </Button>
             </Box>
           </form>

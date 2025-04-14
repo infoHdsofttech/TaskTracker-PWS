@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Paper, Typography, Button, Avatar, useTheme } from "@mui/material";
-
+import { useRouter } from "next/navigation";
 import TaskCard,{Task} from "@/component/UI/TaskCard/TaskCard";
 import {
   fetchTasksByStatus,
@@ -11,10 +11,14 @@ import {
   deleteTaskAction,
   deferTaskAction,
 } from "@/actions/task";
+import { TaskContext } from "@/component/context/TaskContext";
 import ButtonInput from "@/component/UI/ButtonInput/ButtonInput";
 
 export default function Home() {
   const theme = useTheme();
+  const router = useRouter();
+
+  const { setEditingTask, setTaskActionType, setTaskId, setTaskName, setTaskData } = useContext(TaskContext)!;
   
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeFilter, setActiveFilter] = useState<"ALL" | "PENDING" | "IN_PROGRESS" | "COMPLETED" | "DEFERRED">("IN_PROGRESS");
@@ -71,8 +75,16 @@ export default function Home() {
   };
 
   const handleEdit = (id: string) => {
-    // This could route to an edit page or open a modal
-    console.log("Edit task", id);
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    
+    setEditingTask(true);
+    setTaskActionType("Edit Task");
+    setTaskId(task.id);
+    setTaskName(task.title);
+    setTaskData(task);
+    // Then navigate to the create/edit page
+    router.push("/create-task"); // Adjust the route as needed
   };
 
   const handleDelete = async (id: string) => {
