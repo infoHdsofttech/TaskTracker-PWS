@@ -1,38 +1,47 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import {
+  useForm,
+  SubmitHandler,
+  Controller
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Typography, Button, useTheme } from "@mui/material";
-
-// Action functions for task creation and update.
+import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,  // For the loader
+  useTheme
+} from "@mui/material";
+import { useRouter } from "next/navigation";
+// Actions for tasks
 import {
   createTaskAction,
   updateTaskAction,
-  fetchTaskByIdAction
 } from "@/actions/task";
-
-// Import the project action to fetch all projects.
+// Projects
 import { getAllProjectsByUserAction } from "@/actions/project";
 
-// Import the Zod schema and its inferred type.
+// Zod schema
 import { createTaskSchema, CreateTaskInput } from "@/lib/zod/task";
 
-// Import your context and its type.
-
+// Context
 import { TaskContext } from "@/component/context/TaskContext";
 
-// Custom UI components
+// Custom UI
 import InputField from "@/component/UI/InputField/InputField";
 import DropDownSelectField from "@/component/UI/DropDownSelectField/DropdownSelectField";
 
 export default function CreateTaskPage() {
   const theme = useTheme();
-
-  // Get values from context. The "!" asserts that context is defined
+  const router = useRouter();
+  // Values from context
   const { editingTask, taskData, setEditingTask } = useContext(TaskContext)!;
 
+  // React Hook Form
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -44,19 +53,22 @@ export default function CreateTaskPage() {
     },
   });
 
-  // State for project options dropdown.
+  // Project dropdown data
   const [projectOptions, setProjectOptions] = useState<
     { value: string; label: string }[]
   >([]);
 
-  // Fetch project options on mount.
+  // Loader: tracks whether we’re done fetching data and setting defaults
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Fetch project options on mount
   useEffect(() => {
     (async () => {
       try {
         const response = await getAllProjectsByUserAction();
-        const options = response.projects.map((project: any) => ({
-          value: project.id,
-          label: project.projectName,
+        const options = response.projects.map((p: any) => ({
+          value: p.id,
+          label: p.projectName,
         }));
         setProjectOptions(options);
       } catch (error) {
@@ -65,42 +77,49 @@ export default function CreateTaskPage() {
     })();
   }, []);
 
-  // If editing mode is on and taskData exists, prefill the form.
+  // Once we have projectOptions, apply edit data if needed
   useEffect(() => {
-    if (editingTask && taskData) {
-      reset({
-        projectId: taskData.projectId,
-        title: taskData.title,
-        description: taskData.description,
-        startDate: taskData.plannedStart
-          ? new Date(taskData.plannedStart).toISOString().split("T")[0]
-          : "",
-        endDate: taskData.plannedEnd
-          ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
-          : "",
-        priority: taskData.priority,
-        estimatedTime: taskData.estimatedTime,
-        status: taskData.status,
-        actualStart: taskData.actualStart
-          ? new Date(taskData.actualStart).toISOString().split("T")[0]
-          : "",
-        actualEnd: taskData.actualEnd
-          ? new Date(taskData.actualEnd).toISOString().split("T")[0]
-          : "",
-        isPaused: taskData.isPaused,
-        completedHours: taskData.completedHours,
-      });
+    if (projectOptions.length > 0) {
+      // If in editing mode and we have data
+      if (editingTask && taskData) {
+        reset({
+          projectId: taskData.projectId,
+          title: taskData.title,
+          description: taskData.description,
+          startDate: taskData.plannedStart
+            ? new Date(taskData.plannedStart).toISOString().split("T")[0]
+            : "",
+          endDate: taskData.plannedEnd
+            ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
+            : "",
+          priority: taskData.priority,
+          estimatedTime: taskData.estimatedTime,
+          status: taskData.status,
+          actualStart: taskData.actualStart
+            ? new Date(taskData.actualStart).toISOString().split("T")[0]
+            : "",
+          actualEnd: taskData.actualEnd
+            ? new Date(taskData.actualEnd).toISOString().split("T")[0]
+            : "",
+          isPaused: taskData.isPaused,
+          completedHours: taskData.completedHours,
+        });
+      }
+      // We’ve either set edit data or we’re in create mode
+      setIsLoading(false);
     }
-  }, [editingTask, taskData, reset]);
+  }, [editingTask, taskData, projectOptions, reset]);
 
-  // onSubmit handler calls update if editing, or create if not.
+  // Submit (create or update)
   const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
     try {
       if (editingTask && taskData) {
+        // Update mode
         await updateTaskAction(taskData.id, data);
-        // Clear editing state after successful update.
         setEditingTask(false);
+        router.push("/home");
       } else {
+        // Create mode
         await createTaskAction(data);
       }
       reset();
@@ -109,6 +128,25 @@ export default function CreateTaskPage() {
     }
   };
 
+  // If we’re still loading (fetching projects or setting default values), show loader
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          p: 2,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f9f9f9"
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Otherwise, render the form
   return (
     <Box
       sx={{
@@ -127,17 +165,12 @@ export default function CreateTaskPage() {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {/* Row for Task Name & Project Selection */}
               <Box
                 sx={{
                   display: "flex",
                   gap: "5%",
-                  flexDirection: {
-                    xs: "column",
-                    sm: "column",
-                    md: "column",
-                    lg: "row",
-                    xl: "row",
-                  },
+                  flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                 }}
               >
                 <InputField
@@ -147,26 +180,27 @@ export default function CreateTaskPage() {
                   errorMessage={errors.title?.message}
                   {...register("title")}
                 />
-                <DropDownSelectField
-                  label="Project"
-                  required
-                  errorMessage={errors.projectId?.message}
-                  options={projectOptions}
-                  {...register("projectId")}
+                <Controller
+                  control={control}
+                  name="projectId"
+                  render={({ field }) => (
+                    <DropDownSelectField
+                      label="Project"
+                      required
+                      errorMessage={errors.projectId?.message}
+                      options={projectOptions}
+                      {...field}
+                    />
+                  )}
                 />
               </Box>
 
+              {/* Row for Description & Priority */}
               <Box
                 sx={{
                   display: "flex",
                   gap: "5%",
-                  flexDirection: {
-                    xs: "column",
-                    sm: "column",
-                    md: "column",
-                    lg: "row",
-                    xl: "row",
-                  },
+                  flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                 }}
               >
                 <InputField
@@ -175,31 +209,30 @@ export default function CreateTaskPage() {
                   errorMessage={errors.description?.message}
                   {...register("description")}
                 />
-                <DropDownSelectField
-                  label="Priority"
-                  required
-                  options={[
-                    { value: "LOW", label: "Low" },
-                    { value: "MEDIUM", label: "Medium" },
-                    { value: "HIGH", label: "High" },
-                  ]}
-                  {...register("priority", {
-                    onChange: (e) => {} // You can update local state if needed
-                  })}
+                <Controller
+                  control={control}
+                  name="priority"
+                  render={({ field }) => (
+                    <DropDownSelectField
+                      label="Priority"
+                      required
+                      options={[
+                        { value: "LOW", label: "Low" },
+                        { value: "MEDIUM", label: "Medium" },
+                        { value: "HIGH", label: "High" },
+                      ]}
+                      {...field}
+                    />
+                  )}
                 />
               </Box>
 
+              {/* Row for Planned Start & End Date */}
               <Box
                 sx={{
                   display: "flex",
                   gap: "5%",
-                  flexDirection: {
-                    xs: "column",
-                    sm: "column",
-                    md: "column",
-                    lg: "row",
-                    xl: "row",
-                  },
+                  flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                 }}
               >
                 <InputField
@@ -214,13 +247,8 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "5%",
-                  flexDirection: "column",
-                }}
-              >
+              {/* Row for Estimated Time */}
+              <Box sx={{ display: "flex", gap: "5%", flexDirection: "column" }}>
                 <InputField
                   label="Estimated Time (hours)"
                   type="number"
@@ -229,37 +257,37 @@ export default function CreateTaskPage() {
                 />
               </Box>
 
-              {/* Add additional fields if needed (e.g., for edit mode) */}
+              {/* Additional fields if editing */}
               {editingTask && (
                 <>
                   <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
                     Timer & Status Info
                   </Typography>
-                  <DropDownSelectField
-                    label="Status"
-                    required
-                    options={[
-                      { value: "PENDING", label: "Pending" },
-                      { value: "IN_PROGRESS", label: "In Progress" },
-                      { value: "COMPLETED", label: "Completed" },
-                      { value: "DEFERRED", label: "Deferred" },
-                    ]}
-                    {...register("status")}
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field }) => (
+                      <DropDownSelectField
+                        label="Status"
+                        required
+                        options={[
+                          { value: "PENDING", label: "Pending" },
+                          { value: "IN_PROGRESS", label: "In Progress" },
+                          { value: "COMPLETED", label: "Completed" },
+                          { value: "DEFERRED", label: "Deferred" },
+                        ]}
+                        {...field}
+                      />
+                    )}
                   />
                   <Box
                     sx={{
                       display: "flex",
                       gap: "5%",
-                      flexDirection: {
-                        xs: "column",
-                        sm: "column",
-                        md: "column",
-                        lg: "row",
-                        xl: "row",
-                      },
+                      flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                     }}
                   >
-                    <InputField
+                    {/* <InputField
                       label="Actual Start Date"
                       type="date"
                       errorMessage={errors.actualStart?.message}
@@ -270,43 +298,35 @@ export default function CreateTaskPage() {
                       type="date"
                       errorMessage={errors.actualEnd?.message}
                       {...register("actualEnd")}
-                    />
+                    /> */}
                   </Box>
                   <Box
                     sx={{
                       display: "flex",
                       gap: "5%",
-                      flexDirection: {
-                        xs: "column",
-                        sm: "column",
-                        md: "column",
-                        lg: "row",
-                        xl: "row",
-                      },
+                      flexDirection: { xs: "column", sm: "column", md: "column", lg: "row", xl: "row" },
                     }}
                   >
-                    <InputField
-                      label="Completed Hours"
-                      type="number"
-                      errorMessage={errors.completedHours?.message}
-                      {...register("completedHours")}
-                    />
-                    <InputField
+                    {taskData.status === "COMPLETED" && (
+                           <InputField
+                           label="Completed Hours"
+                           type="number"
+                           errorMessage={errors.completedHours?.message}
+                           {...register("completedHours")}
+                         />
+                     )}
+               
+                    {/* <InputField
                       label="Timer Paused (true/false)"
                       type="text"
                       errorMessage={errors.isPaused?.message}
                       {...register("isPaused")}
-                    />
+                    /> */}
                   </Box>
                 </>
               )}
 
-              <Button
-                variant="contained"
-                type="submit"
-                fullWidth
-                sx={{ mt: 2, py: 1.5 }}
-              >
+              <Button variant="contained" type="submit" fullWidth sx={{ mt: 2, py: 1.5 }}>
                 {editingTask ? "Update Task" : "Create Task"}
               </Button>
             </Box>

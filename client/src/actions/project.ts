@@ -57,7 +57,7 @@ export interface CreateProjectData {
 
   export const getAllProjectsByUserAction = async () => {
     try {
-      const response = await api.get(`/project/fetch--all-projects`);
+      const response = await api.get(`/project/fetch-all-projects`);
       return response.data;
     } catch (error: any) {
       toast.error("Failed to load projects");

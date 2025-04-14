@@ -4,8 +4,10 @@ export const createTaskSchema = z.object({
   projectId: z.string().nonempty("Project is required"),
   title: z.string().nonempty("Task name is required"),
   description: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  // startDate: z.string().optional(),
+  // endDate: z.string().optional(),
+  startDate: z.string().nonempty("Start date is required"),
+  endDate: z.string().nonempty("End date is required"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]).default("MEDIUM"),
   // estimatedTime: z.number(), // a number now
   estimatedTime: z.preprocess((val) => {

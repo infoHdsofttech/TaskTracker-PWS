@@ -1,3 +1,7 @@
+// src/component/UI/DropDownSelectField/DropdownSelectField.tsx
+"use client";
+
+import React, { forwardRef } from "react";
 import { Info } from "@mui/icons-material";
 import {
   Box,
@@ -7,7 +11,6 @@ import {
   MenuItem,
   SelectProps,
 } from "@mui/material";
-import React, { forwardRef } from "react";
 
 type Option = {
   value: string | number;
@@ -25,6 +28,7 @@ type Props = {
 } & SelectProps;
 
 const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
+  // Destructure value and onChange explicitly so they can be passed to the Select component.
   const {
     label,
     required,
@@ -33,6 +37,8 @@ const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
     disabled,
     icon,
     options,
+    value,
+    onChange,
     ...selectProps
   } = props;
 
@@ -50,7 +56,6 @@ const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
   return (
     <Box
       sx={{
-        // White rounded container (same as InputField)
         backgroundColor: "#fff",
         boxShadow: "0px 4px 8px rgba(70, 95, 241, 0.10)",
         borderRadius: 2,
@@ -59,7 +64,7 @@ const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
         width: "100%",
       }}
     >
-      {/* Label Section inside container */}
+      {/* Label Section */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
         <Typography variant="body2" sx={{ color: "#666", fontWeight: 500 }}>
           {label}
@@ -83,7 +88,6 @@ const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
       {/* Select Field Section */}
       <Box
         sx={{
-          // Optionally remove extra padding if you want the label and select to be in one container without inner separation.
           padding: "10px",
           borderRadius: "8px",
           bgcolor: "white",
@@ -94,17 +98,16 @@ const DropDownSelectField = forwardRef<HTMLDivElement, Props>((props, ref) => {
         <Select
           ref={ref}
           disabled={disabled}
+          value={value}            // Pass the controlled value
+          onChange={onChange}      // Pass the controlled onChange
           {...selectProps}
           fullWidth
-          // Use standard variant and remove underline styles
           variant="standard"
           sx={{
             "&:before, &:after": { display: "none" },
             fontSize: "1.125rem",
             color: "#222",
             width: "100%",
-            // Remove default padding if needed
-            paddingLeft: icon ? "0" : "0",
           }}
           IconComponent={icon ? () => icon : undefined}
         >

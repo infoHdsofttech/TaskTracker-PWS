@@ -93,7 +93,7 @@ projectRouter.delete('/delete-project/:id', verifyToken, async (req: Request, re
   }
 });
 // Fetch All Projects by User
-projectRouter.get('/fetch--all-projects', verifyToken, async (req: Request, res: Response) => {
+projectRouter.get('/fetch-all-projects', verifyToken, async (req: Request, res: Response) => {
   const userId = (req as any).userId;
   try {
     const projects = await prisma.projectMaster.findMany({
