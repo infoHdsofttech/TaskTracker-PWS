@@ -146,6 +146,32 @@ analyticsRouter.get(
 );
 
 // Fetch timeline chart data
+// analyticsRouter.get(
+//   "/timeline",
+//   verifyToken,
+//   async (req: Request, res: Response) => {
+//     const userId = (req as any).userId;
+//     try {
+//       const tasks = await prisma.task.findMany({
+//         where: { userId },
+//         select: {
+//           plannedStart: true,
+//           completedHours: true,
+//         },
+//       });
+
+//       const data = tasks.map((task) => ({
+//         date: task.plannedStart.toISOString().split("T")[0],
+//         Completed: task.completedHours || 0,
+//       }));
+
+//       res.status(200).json({ message: "Timeline data fetched", data });
+//     } catch (error) {
+//       res.status(500).json({ message: "Failed to fetch timeline data", error });
+//     }
+//   }
+// );
+
 analyticsRouter.get(
   "/timeline",
   verifyToken,
@@ -153,16 +179,19 @@ analyticsRouter.get(
     const userId = (req as any).userId;
     try {
       const tasks = await prisma.task.findMany({
-        where: { userId },
-        select: {
-          plannedStart: true,
-          completedHours: true,
-        },
+      where: { userId },
+      select: {
+        actualStart: true,
+        completedHours: true,
+      },
+      orderBy: {
+        actualStart: 'asc'
+      }
       });
 
       const data = tasks.map((task) => ({
-        date: task.plannedStart.toISOString().split("T")[0],
-        Completed: task.completedHours || 0,
+      date: task.actualStart.toISOString().split("T")[0],
+      Completed: task.completedHours || 0,
       }));
 
       res.status(200).json({ message: "Timeline data fetched", data });
