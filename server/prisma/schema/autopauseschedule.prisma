@@ -1,0 +1,8 @@
+model AutoPauseSchedule {
+  id       String   @id @default(uuid())
+  userId   String //FK here, relation added below
+  pauseAt  DateTime // When the tasks should be auto-paused
+  isPaused Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id]) //userId from here refences id from User model
+}

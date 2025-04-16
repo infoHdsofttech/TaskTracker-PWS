@@ -12,36 +12,36 @@ enum TaskPriority {
 }
 
 model Task {
-  id             String       @id @default(uuid())
-  title          String
-  description    String?
+  id          String  @id @default(uuid())
+  title       String
+  description String?
   // group          String?      // Optional grouping field (e.g., "Work", "Personal")
-  
+
   // Planned dates: when the task is scheduled to start & end
-  plannedStart   DateTime     // Scheduled start date of the task
-  plannedEnd     DateTime?    // Optional planned end date or deadline for the task
-  
+  plannedStart DateTime // Scheduled start date of the task
+  plannedEnd   DateTime? // Optional planned end date or deadline for the task
+
   // Actual dates: when the task actually starts & ends
-  actualStart    DateTime?    // Actual start date of the task
-  actualEnd      DateTime?    // Actual end date of the task
-  
-  status         TaskStatus   @default(PENDING)  // Options: PENDING, IN_PROGRESS, COMPLETED, DEFERRED
-  priority       TaskPriority @default(MEDIUM)   // Options: LOW, MEDIUM, HIGH
-  
-  project        ProjectMaster @relation(fields: [projectId], references: [id])
-  projectId      String
+  actualStart DateTime? // Actual start date of the task
+  actualEnd   DateTime? // Actual end date of the task
+
+  status   TaskStatus   @default(PENDING) // Options: PENDING, IN_PROGRESS, COMPLETED, DEFERRED
+  priority TaskPriority @default(MEDIUM) // Options: LOW, MEDIUM, HIGH
+
+  project   ProjectMaster @relation(fields: [projectId], references: [id])
+  projectId String
 
   // Timer-related fields
-  timerStarted   DateTime?    // When the task timer was started
-  timerEnded     DateTime?    // When the task timer was stopped
-  isPaused       Boolean      @default(false)    // Flag to pause the timer
+  timerStarted DateTime? // When the task timer was started
+  timerEnded   DateTime? // When the task timer was stopped
+  isPaused     Boolean   @default(false) // Flag to pause the timer
 
-  completedHours Float        @default(0.0)
-  
-  user           User         @relation(fields: [userId], references: [id])
-  userId         String
-  
-  estimatedTime  Int?         // Estimated time in hours
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  completedHours Float @default(0.0)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  estimatedTime Int? // Estimated time in hours
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

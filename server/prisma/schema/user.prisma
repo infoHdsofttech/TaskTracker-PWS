@@ -1,10 +1,11 @@
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  password   String
-  tasks      Task[]
-  projects   ProjectMaster[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String              @id @default(uuid())
+  name      String
+  email     String              @unique
+  password  String
+  tasks     Task[]
+  projects  ProjectMaster[]
+  autoPause AutoPauseSchedule[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 }
