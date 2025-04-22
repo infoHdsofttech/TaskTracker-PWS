@@ -45,6 +45,19 @@ export const createTaskAction = async (data: CreateTaskData) => {
   }
 };
 
+// Pause all in‑progress tasks for the current user
+export const pauseAllTasksAction = async () => {
+  try {
+    const response = await api.post("/task/pause-all");
+    toast.success("All running tasks have been paused!");
+    return response.data;
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || "Error pausing tasks");
+    throw error;
+  }
+};
+
+
 // Update an existing task by ID
 export const updateTaskAction = async (id: string, data: UpdateTaskData) => {
   try {

@@ -5,6 +5,8 @@ import authRouter from './src/routes/auth/auth';
 import taskRouter from './src/routes/task/task';
 import projectRouter from './src/routes/project/project';
 import analyticsRouter from './src/routes/analytics/analytics';
+import autoPauseRouter from './src/routes/autopause/autopause';
+import '../server/src/crons/autoPauseCron'
 
 const app = express();
 
@@ -23,6 +25,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/task', taskRouter);
 app.use('/api/project', projectRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/autopause', autoPauseRouter);
 
 // Start the server
 app.listen(9000, () => {

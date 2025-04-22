@@ -35,6 +35,32 @@ taskRouter.post('/create-task', verifyToken, async (req: Request, res: Response)
   }
 });
 
+taskRouter.post(
+  "/pause-all",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    try {
+      const result = await prisma.task.updateMany({
+        where: {
+          userId,
+          status: "IN_PROGRESS",
+        },
+        data: {
+          isPaused: true,
+        },
+      });
+      res.json({
+        message: "All in‑progress tasks paused",
+        count: result.count,
+      });
+    } catch (e) {
+      console.error("Error pausing all tasks:", e);
+      res.status(500).json({ message: "Failed to pause tasks" });
+    }
+  }
+);
+
 // Update Task Endpoint: Accepts updates including status, timer fields,
 // plus new fields: actualStart, actualEnd, isPaused, and completedHours.
 taskRouter.put('/update-task/:id', verifyToken, async (req: Request, res: Response) => {
