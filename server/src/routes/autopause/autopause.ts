@@ -16,7 +16,13 @@ autoPauseRouter.post(
     const userId = (req as any).userId;
     const { delayMinutes } = req.body;
     const pauseAt = new Date(Date.now() + delayMinutes * 60_000);
+    
     try {
+      // Remove any old, un‑processed schedules
+      await prisma.autoPauseSchedule.deleteMany({
+        where: { userId, isPaused: false }
+      });
+
       const schedule = await prisma.autoPauseSchedule.create({
         data: { userId, pauseAt },
       });
