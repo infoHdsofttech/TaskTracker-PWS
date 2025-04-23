@@ -4,13 +4,15 @@ import verifyToken from "../../middlewares/Authenticate";
 
 const analyticsRouter = Router();
 
-// Fetch all tasks summary
+// // Fetch all tasks summary
+
 analyticsRouter.get(
   "/fetch-all-tasks-summary",
   verifyToken,
   async (req: Request, res: Response) => {
     const userId = (req as any).userId;
     try {
+      // 1) Grab tasks plus their projectName
       const tasks = await prisma.task.findMany({
         where: { userId },
         select: {
@@ -19,10 +21,25 @@ analyticsRouter.get(
           completedHours: true,
           estimatedTime: true,
           plannedStart: true,
+          project: {
+            select: { projectName: true }
+          },
         },
       });
-      res.status(200).json({ message: "Task summary fetched", tasks });
+
+      // 2) Flatten `project.projectName` into `projectName`
+      const payload = tasks.map((t) => ({
+        title: t.title,
+        status: t.status,
+        completedHours: t.completedHours,
+        estimatedTime: t.estimatedTime,
+        plannedStart: t.plannedStart,
+        projectName: t.project.projectName,
+      }));
+
+      res.status(200).json({ message: "Task summary fetched", tasks: payload });
     } catch (error) {
+      console.error("Failed to fetch task summary:", error);
       res.status(500).json({ message: "Failed to fetch task summary", error });
     }
   }

@@ -21,7 +21,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import EventIcon from "@mui/icons-material/Event";
 import GroupIcon from "@mui/icons-material/Group";
 import AddTaskIcon from "@mui/icons-material/AddTask";
-
+import BarChartIcon from '@mui/icons-material/BarChart';
 // --- Memoized Drawer Component ---
 const NavigationDrawer = React.memo(() => {
   const theme = useTheme();
@@ -67,11 +67,11 @@ const NavigationDrawer = React.memo(() => {
             <ListItemText primary="Calendar" />
           </ListItemButton>
 
-          <ListItemButton onClick={() => router.push("/team")}>
+          <ListItemButton onClick={() => router.push("/view-analytics")}>
             <ListItemIcon>
-              <GroupIcon />
+              <BarChartIcon />
             </ListItemIcon>
-            <ListItemText primary="Team" />
+            <ListItemText primary="View Analytics" />
           </ListItemButton>
         </List>
       </Box>
@@ -145,7 +145,11 @@ export default function NavigationMenuLayout({ children }: LayoutProps) {
               icon={<AddTaskIcon />}
               onClick={() => router.push("/create-task")}
             />
-            <BottomNavigationAction label="Team" icon={<GroupIcon />} />
+            <BottomNavigationAction 
+            label="View Analytics" 
+            icon={<BarChartIcon />}
+            onClick={() => router.push("/view-analytics")} 
+            />
           </BottomNavigation>
         </Paper>
       </Box>
