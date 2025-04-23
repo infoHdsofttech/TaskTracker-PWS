@@ -1,3 +1,4 @@
+import './src/crons/autoPauseCron';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import prisma from './src/lib/prisma'; // Ensure this exports PrismaClient
@@ -6,7 +7,7 @@ import taskRouter from './src/routes/task/task';
 import projectRouter from './src/routes/project/project';
 import analyticsRouter from './src/routes/analytics/analytics';
 import autoPauseRouter from './src/routes/autopause/autopause';
-import '../server/src/crons/autoPauseCron'
+
 
 const app = express();
 
