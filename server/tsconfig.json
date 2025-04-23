@@ -13,14 +13,14 @@
     "typeRoots": ["node_modules/@types"],
 
     // ← automatically include these global types
-    // "types": [
-    //   "node",
-    //   "express",
-    //   "cors",
-    //   "node-cron",
-    //   "jsonwebtoken",
-    //   "multer"
-    // ],
+    "types": [
+      "node",
+      "express",
+      "cors",
+      "node-cron",
+      "jsonwebtoken",
+      "multer"
+    ],
 
     // optional but helps skip any third-party type errors
     "skipLibCheck": true,
