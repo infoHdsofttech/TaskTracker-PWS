@@ -1,4 +1,5 @@
 import express, { Request, response, Response } from 'express';
+//@ts-ignore
 import bcrypt from 'bcryptjs';  // Hashing passwords
 import jwt from 'jsonwebtoken'; // Generating JWT token
 import prisma from '../../lib/prisma';

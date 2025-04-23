@@ -207,7 +207,7 @@ analyticsRouter.get(
       });
 
       const data = tasks.map((task) => ({
-      date: task.actualStart.toISOString().split("T")[0],
+      date: task.actualStart?.toISOString().split("T")[0] ?? new Date().toISOString().split("T")[0],
       Completed: task.completedHours || 0,
       }));
 

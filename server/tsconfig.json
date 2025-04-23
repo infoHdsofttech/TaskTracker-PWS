@@ -1,10 +1,37 @@
 {
-    "compilerOptions": {
-      "module": "CommonJS", 
-      "target": "ESNext",
-      "moduleResolution": "Node",
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true
-    }
-  }
-  
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    // ← where to write compiled JS
+    "outDir": "dist",
+
+    // ← look here for `@types/` packages    
+    "typeRoots": ["node_modules/@types"],
+
+    // ← automatically include these global types
+    "types": [
+      "node",
+      "express",
+      "cors",
+      "node-cron",
+      "jsonwebtoken",
+      "multer"
+    ],
+
+    // optional but helps skip any third-party type errors
+    "skipLibCheck": true,
+
+    // tighten up
+    "strict": true
+  },
+
+  // ← compile everything under `src` and also `index.ts` at project root
+  "include": ["src/**/*.ts", "index.ts"],
+
+  // ← don’t compile your dependencies
+  "exclude": ["node_modules", "dist"]
+}
