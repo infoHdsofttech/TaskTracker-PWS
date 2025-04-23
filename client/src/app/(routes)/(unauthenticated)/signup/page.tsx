@@ -1,7 +1,7 @@
 "use client";
 
 import "../../../globals.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Container, Paper, Tabs, Tab, Button } from "@mui/material";
 import Typography from "@mui/material/Typography";
@@ -18,12 +18,22 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const AuthPage = () => {
+
+  
+  const router = useRouter();
+  const theme = useTheme();
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      router.replace("/home");
+    }
+  }, [router]);
+  
   const [tabIndex, setTabIndex] = useState(0);
   const isSignup = tabIndex === 1;
   const schema = isSignup ? signupSchema : loginSchema;
 
-  const router = useRouter();
-  const theme = useTheme();
 
   const {
     register,
