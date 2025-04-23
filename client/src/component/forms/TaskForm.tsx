@@ -82,35 +82,40 @@ export default function TaskForm() {
   // Once we have projectOptions, apply edit data if needed
   useEffect(() => {
     if (projectOptions.length > 0) {
-      // If in editing mode and we have data
-      if ((editingTask || viewingTask) && taskData) {
-        reset({
-          projectId: taskData.projectId,
-          title: taskData.title,
-          description: taskData.description,
-          startDate: taskData.plannedStart
-            ? new Date(taskData.plannedStart).toISOString().split("T")[0]
-            : "",
-          endDate: taskData.plannedEnd
-            ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
-            : "",
-          priority: taskData.priority,
-          estimatedTime: taskData.estimatedTime,
-          status: taskData.status,
-          actualStart: taskData.actualStart
-            ? new Date(taskData.actualStart).toISOString().split("T")[0]
-            : "",
-          actualEnd: taskData.actualEnd
-            ? new Date(taskData.actualEnd).toISOString().split("T")[0]
-            : "",
-          isPaused: taskData.isPaused,
-          completedHours: taskData.completedHours,
-        });
+      try {
+        // If in editing mode and we have data
+        if ((editingTask || viewingTask) && taskData) {
+          reset({
+            projectId: taskData.projectId,
+            title: taskData.title,
+            description: taskData.description,
+            startDate: taskData.plannedStart
+              ? new Date(taskData.plannedStart).toISOString().split("T")[0]
+              : "",
+            endDate: taskData.plannedEnd
+              ? new Date(taskData.plannedEnd).toISOString().split("T")[0]
+              : "",
+            priority: taskData.priority,
+            estimatedTime: taskData.estimatedTime,
+            status: taskData.status,
+            actualStart: taskData.actualStart
+              ? new Date(taskData.actualStart).toISOString().split("T")[0]
+              : "",
+            actualEnd: taskData.actualEnd
+              ? new Date(taskData.actualEnd).toISOString().split("T")[0]
+              : "",
+            isPaused: taskData.isPaused,
+            completedHours: taskData.completedHours,
+          });
+        }
+      } catch (error) {
+        console.error("Error setting form data:", error);
+      } finally {
+        // We've either set edit data or we're in create mode
+        setIsLoading(false);
       }
-      // We’ve either set edit data or we’re in create mode
-      setIsLoading(false);
     }
-  }, [viewingTask,editingTask, taskData, projectOptions, reset]);
+  }, [viewingTask, editingTask, taskData, projectOptions, reset]);
 
   // Submit (create or update)
   const onSubmit: SubmitHandler<CreateTaskInput> = async (data) => {
