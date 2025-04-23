@@ -76,6 +76,10 @@ export default function TaskForm() {
       } catch (error) {
         console.error("Error fetching projects:", error);
       }
+      finally {
+        // ALWAYS stop loading once the fetch completes (success or failure)
+        setIsLoading(false);
+      }
     })();
   }, []);
 
@@ -110,10 +114,11 @@ export default function TaskForm() {
         }
       } catch (error) {
         console.error("Error setting form data:", error);
-      } finally {
-        // We've either set edit data or we're in create mode
-        setIsLoading(false);
       }
+      //  finally {
+      //   // We've either set edit data or we're in create mode
+      //   setIsLoading(false);
+      // }
     }
   }, [viewingTask, editingTask, taskData, projectOptions, reset]);
 
