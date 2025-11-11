@@ -14,7 +14,8 @@ const app = express();
 // Enable CORS for frontend
 app.use(cors({
     // origin: 'http://localhost:3000', // Allow frontend domain
-    origin: 'https://task-tracker-pwa.vercel.app', // Allow frontend domain
+    // origin: 'https://task-tracker-pwa.vercel.app', // Allow frontend domain
+    origin: process.env.MAIN_DOMAIN_URL,
     methods: 'GET,POST,PUT,DELETE,PATCH',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true, // Allow cookies and authentication headers
